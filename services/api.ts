@@ -18,12 +18,15 @@ const DEFAULT_HEADERS: Record<string, string> = {
   "Schoolid": "86"
 };
 
-export function buildHeaders(token?: string): Record<string, string> {
+export function buildHeaders(token?: string,school_id?:string): Record<string, string> {
   const headers: Record<string, string> = { ...DEFAULT_HEADERS };
   if (token) {
     // Use the short token from login response as Bearer
     headers['Authorization'] = `Bearer ${token}`;
     headers['token'] = token;
+  }
+  if (school_id) {
+    headers['Schoolid'] = school_id;
   }
   return headers;
 }
@@ -83,11 +86,12 @@ export async function staffLogin(payload: LoginPayload): Promise<LoginResponse> 
  */
 export async function getDailyAttendance(
   date: string,   // "YYYY-MM-DD"
-  token: string
+  token: string,
+  school_id: string
 ): Promise<DailyAttendanceResponse> {
   return apiFetch<DailyAttendanceResponse>('/attendance/get_daily_attendance', {
     method: 'POST',
-    headers: buildHeaders(token),
+    headers: buildHeaders(token,school_id),
     body: JSON.stringify({ date }),
   });
 }
@@ -97,11 +101,13 @@ export async function getDailyAttendance(
  * Requires staff token.
  */
 export async function getAttendanceTypes(
-  token: string
+  token: string,
+  school_id: string
+
 ): Promise<AttendanceTypesResponse> {
   return apiFetch<AttendanceTypesResponse>('/attendance/get_attendance_type', {
     method: 'GET',
-    headers: buildHeaders(token),
+    headers: buildHeaders(token,school_id),
   });
 }
 
@@ -110,11 +116,13 @@ export async function getAttendanceTypes(
  */
 export async function saveAttendance(
   payload: SaveAttendancePayload,
-  token: string
+  token: string,
+  school_id: string
+
 ): Promise<SaveAttendanceResponse> {
   return apiFetch<SaveAttendanceResponse>('/attendance/save_attendance', {
     method: 'POST',
-    headers: buildHeaders(token),
+    headers: buildHeaders(token,school_id),
     body: JSON.stringify(payload),
   });
 }
@@ -125,11 +133,12 @@ export async function saveAttendance(
  */
 export async function getClasswiseAttendance(
   payload: { date: string; class_id: number; section_id: number },
-  token: string
+  token: string,
+  school_id: string
 ): Promise<import('@/types').ClasswiseAttendanceResponse> {
   return apiFetch<import('@/types').ClasswiseAttendanceResponse>('/attendance/get_classwise_attendance', {
     method: 'POST',
-    headers: buildHeaders(token),
-    body: JSON.stringify(payload),
+    headers: buildHeaders(token,school_id),
+    body: JSON.stringify(payload,),
   });
 }

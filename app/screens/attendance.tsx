@@ -172,7 +172,11 @@ export default function AttendanceScreen() {
             if (!silent) setLoading(true);
             setError("");
             try {
-                const res = await getDailyAttendance(date, user.token);
+                const res = await getDailyAttendance(
+                    date,
+                    user.token,
+                    user?.record?.school_id,
+                );
                 if (res.response_code === 200) {
                     setClasses(res.data || []);
                     setTotal(res.total || null);
@@ -204,6 +208,8 @@ export default function AttendanceScreen() {
         (c) => c.mark_by && c.mark_by !== "-",
     ).length;
     const pendingCount = classes.length - markedCount;
+
+    console.log(user);
 
     return (
         <View style={{ flex: 1, backgroundColor: Colors.surface }}>

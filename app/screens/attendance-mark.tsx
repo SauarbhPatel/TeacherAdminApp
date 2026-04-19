@@ -143,10 +143,10 @@ export default function AttendanceMarkScreen() {
     try {
       // Parallel fetch: types + student list
       const [typesRes, classRes] = await Promise.all([
-        getAttendanceTypes(user.token),
+        getAttendanceTypes(user.token,user?.record?.school_id,),
         getClasswiseAttendance(
           { date, class_id: parseInt(class_id), section_id: parseInt(section_id) },
-          user.token
+          user.token,user?.record?.school_id,
         ),
       ]);
 
@@ -197,7 +197,7 @@ export default function AttendanceMarkScreen() {
           student_session_id: parseInt(sessionId),
           attendence_type_id: parseInt(typeId),
         },
-        user.token
+        user.token,user?.record?.school_id,
       );
 
       if (res.response_code === 200) {
