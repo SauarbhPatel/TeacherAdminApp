@@ -107,3 +107,94 @@ export const NOTICES = [
   { type: 'general', tag: 'General', title: 'Revised Academic Calendar', body: 'The revised academic calendar for Term 2 has been uploaded on the staff portal. Please review the updated exam schedule.', date: 'Mar 30, 2026' },
   { type: 'general', tag: 'General', title: 'Staff Development Workshop', body: 'A professional development workshop will be held on April 22 in the school auditorium from 10 AM to 2 PM.', date: 'Mar 28, 2026' },
 ];
+
+// ─── Marks Entry Mock Data ───────────────────────────────
+
+export const MARKS_CLASSES = [
+  { class_id: '2135', class_name: 'I' },
+  { class_id: '2136', class_name: 'II' },
+  { class_id: '2137', class_name: 'III' },
+  { class_id: '2138', class_name: 'IV' },
+  { class_id: '2139', class_name: 'V' },
+];
+
+export const MARKS_SECTIONS: Record<string, { section_id: string; section_name: string }[]> = {
+  '2135': [{ section_id: '868', section_name: 'A' }, { section_id: '869', section_name: 'B' }, { section_id: '870', section_name: 'C' }],
+  '2136': [{ section_id: '871', section_name: 'A' }, { section_id: '872', section_name: 'B' }],
+  '2137': [{ section_id: '873', section_name: 'A' }, { section_id: '874', section_name: 'B' }, { section_id: '875', section_name: 'C' }],
+  '2138': [{ section_id: '876', section_name: 'A' }, { section_id: '877', section_name: 'B' }],
+  '2139': [{ section_id: '878', section_name: 'A' }, { section_id: '879', section_name: 'B' }, { section_id: '880', section_name: 'C' }],
+};
+
+export const MOCK_EXAMS = [
+  { exam_id: '1', exam_name: 'PT- I' },
+  { exam_id: '2', exam_name: 'NB- I' },
+  { exam_id: '3', exam_name: 'PT- II' },
+  { exam_id: '4', exam_name: 'Half Yearly' },
+  { exam_id: '5', exam_name: 'PT- III' },
+  { exam_id: '6', exam_name: 'Annual' },
+];
+
+export const MOCK_SUBJECTS = [
+  { subject_id: '1', subject_name: 'ENGLISH',     max_marks: 20 },
+  { subject_id: '2', subject_name: 'HINDI',        max_marks: 20 },
+  { subject_id: '3', subject_name: 'MATHEMATICS',  max_marks: 20 },
+  { subject_id: '8', subject_name: 'EVS',          max_marks: 20 },
+];
+
+const makeStudents = (classId: string, sectionId: string, className: string, sectionName: string, examId: string) => {
+  const names = [
+    { name: 'AVNI', father: 'MANOJ KUMAR', adm: '24/330' },
+    { name: 'ARJUN SHARMA', father: 'RAJESH SHARMA', adm: '24/331' },
+    { name: 'PRIYA GUPTA', father: 'SURESH GUPTA', adm: '24/332' },
+    { name: 'RAHUL VERMA', father: 'DEEPAK VERMA', adm: '24/333' },
+    { name: 'NEHA SINGH', father: 'VIKRAM SINGH', adm: '24/334' },
+    { name: 'RIYA PATEL', father: 'AMIT PATEL', adm: '24/335' },
+    { name: 'ISHAAN MEHTA', father: 'SANJAY MEHTA', adm: '24/336' },
+    { name: 'KAVYA NAIR', father: 'KRISHNA NAIR', adm: '24/337' },
+    { name: 'ROHAN JOSHI', father: 'PRAKASH JOSHI', adm: '24/338' },
+    { name: 'SNEHA YADAV', father: 'RAMESH YADAV', adm: '24/339' },
+    { name: 'DEV AGARWAL', father: 'MOHAN AGARWAL', adm: '24/340' },
+    { name: 'SIMRAN KAUR', father: 'GURPREET SINGH', adm: '24/341' },
+  ];
+
+  return names.map((s, i) => {
+    const subjects = MOCK_SUBJECTS.map(sub => {
+      const obtained = Math.floor(Math.random() * (sub.max_marks - 8)) + 8;
+      const pct = ((obtained / sub.max_marks) * 100).toFixed(0);
+      const grade = parseInt(pct) >= 91 ? 'A1' : parseInt(pct) >= 81 ? 'A2' : parseInt(pct) >= 71 ? 'B1' : parseInt(pct) >= 61 ? 'B2' : 'C1';
+      const gp = parseInt(pct) >= 91 ? '10.00' : parseInt(pct) >= 81 ? '9.00' : parseInt(pct) >= 71 ? '8.00' : parseInt(pct) >= 61 ? '7.00' : '6.00';
+      return { ...sub, marks_obtained: obtained, percentage: pct, grade_name: grade, grade_point: gp };
+    });
+
+    const total = subjects.reduce((a, b) => a + b.marks_obtained, 0);
+    const maxTotal = subjects.reduce((a, b) => a + b.max_marks, 0);
+    const pct = ((total / maxTotal) * 100).toFixed(1);
+    const grade = parseFloat(pct) >= 91 ? 'A1' : parseFloat(pct) >= 81 ? 'A2' : parseFloat(pct) >= 71 ? 'B1' : 'B2';
+
+    return {
+      student_id: String(67399 + i),
+      student_session_id: String(91372 + i),
+      class_id: classId,
+      section_id: sectionId,
+      class: className,
+      section: sectionName,
+      admission_no: s.adm,
+      student_name: s.name,
+      father_name: s.father,
+      exams: [{
+        exam_id: examId,
+        exam_name: MOCK_EXAMS.find(e => e.exam_id === examId)?.exam_name ?? 'Exam',
+        max_marks: maxTotal,
+        marks_obtained: total,
+        percentage: pct,
+        grade_name: grade,
+        subjects,
+      }],
+    };
+  });
+};
+
+export function getMockMarksStudents(classId: string, sectionId: string, className: string, sectionName: string, examId: string) {
+  return makeStudents(classId, sectionId, className, sectionName, examId);
+}
