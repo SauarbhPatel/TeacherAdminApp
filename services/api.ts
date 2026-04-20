@@ -15,7 +15,7 @@ const DEFAULT_HEADERS: Record<string, string> = {
   "Client-Service": "smartschool",
   "Auth-Key": "schoolAdmin@",
   token: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiZXJwQG11Zy5jb20iLCJ1c2VybmFtZSI6InJpd2Vic29mdCJ9.89EaZzArzGv44nHv6mZCkcVjL9ruMhAxarhvgjY-umU",
-  "Schoolid": "86"
+  // "Schoolid": "86"
 };
 
 export function buildHeaders(token?: string,school_id?:string): Record<string, string> {
@@ -139,6 +139,84 @@ export async function getClasswiseAttendance(
   return apiFetch<import('@/types').ClasswiseAttendanceResponse>('/attendance/get_classwise_attendance', {
     method: 'POST',
     headers: buildHeaders(token,school_id),
-    body: JSON.stringify(payload,),
+    body: JSON.stringify(payload),
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// MARKS ENTRY
+// ═══════════════════════════════════════════════════════
+
+import type {
+  ClassSectionListResponse,
+  ClassExamListResponse,
+  ClassSectionMarksheetResponse,
+  SaveMarksPayload,
+  SaveMarksResponse,
+} from '@/types';
+
+/**
+ * GET list of all classes with their sections.
+ * GET /webservice/getClassSectionList
+ */
+export async function getClassSectionList(
+  token: string,
+  school_id: string
+
+): Promise<ClassSectionListResponse> {
+  return apiFetch<ClassSectionListResponse>('/webservice/getClassSectionList', {
+    method: 'GET',
+    headers: buildHeaders(token,school_id),
+  });
+}
+
+/**
+ * GET exam list for a specific class/section.
+ * POST /Webservice/getClassExamList
+ */
+export async function getClassExamList(payload: {
+  school_id: string | number;
+  session_id: string | number;
+  class_id: string | number;
+  section_id: string | number;
+}, token: string): Promise<ClassExamListResponse> {
+  return apiFetch<ClassExamListResponse>('/Webservice/getClassExamList', {
+    method: 'POST',
+    headers: buildHeaders(token),
+    body: JSON.stringify(payload),
+  });
+}
+
+/**
+ * GET student marksheet for class/section/exam combination.
+ * POST /Webservice/getClassSectionMarksheet
+ */
+export async function getClassSectionMarksheet(payload: {
+  school_id: string | number;
+  session_id: string | number;
+  class_id: string | number;
+  section_id: string | number;
+  exam_id: string | number;
+}, token: string): Promise<ClassSectionMarksheetResponse> {
+
+  return apiFetch<ClassSectionMarksheetResponse>('/Webservice/getClassSectionMarksheet', {
+    method: 'POST',
+    headers: buildHeaders(token,payload?.school_id),
+    body: JSON.stringify(payload),
+  });
+}
+
+/**
+ * Save a single student's marks for one subject.
+ * POST /Webservice/saveStudentMarksEntry
+ */
+export async function saveStudentMarksEntry(
+  payload: SaveMarksPayload,
+  token: string
+): Promise<SaveMarksResponse> {
+  return apiFetch<SaveMarksResponse>('/Webservice/saveStudentMarksEntry', {
+    method: 'POST',
+    headers: buildHeaders(token),
+    body: JSON.stringify(payload),
   });
 }

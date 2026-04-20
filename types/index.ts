@@ -10,6 +10,7 @@ export interface StaffRecord {
   department: string;
   designation: string;
   school_id: string;
+  session_id?: string;   // present in some API responses
   is_active: string;
   role: string;
 }
@@ -168,4 +169,93 @@ export interface ClasswiseAttendancePayload {
   date: string;
   class_id: number;
   section_id: number;
+}
+
+// ─── Marks Entry ─────────────────────────────────────────
+
+// GET /webservice/getClassSectionList
+export interface ClassSection {
+  section_id: string;
+  section_name: string;
+}
+export interface ClassWithSections {
+  class_id: string;
+  class_name: string;
+  sections: ClassSection[];
+}
+export interface ClassSectionListResponse {
+  total_classes: number;
+  data: ClassWithSections[];
+  response_code: number;
+  response_message: string;
+}
+
+// POST /Webservice/getClassExamList
+export interface ExamItem {
+  exam_id: string;
+  exam_name: string;
+}
+export interface ClassExamListResponse {
+  exams: ExamItem[];
+  response_code: number;
+  response_message: string;
+  message:string;
+
+}
+
+// POST /Webservice/getClassSectionMarksheet
+export interface MarksSubject {
+  subject_id: string;
+  subject_name: string;
+  max_marks: number;
+  marks_obtained: number;
+  percentage: string;
+  grade_name: string;
+  grade_point: string;
+}
+export interface MarksExam {
+  exam_id: string;
+  exam_name: string;
+  max_marks: number;
+  marks_obtained: number;
+  percentage: string;
+  grade_name: string;
+  subjects: MarksSubject[];
+}
+export interface MarksStudent {
+  student_id: string;
+  student_session_id: string;
+  class_id: string;
+  section_id: string;
+  class: string;
+  section: string;
+  admission_no: string;
+  student_name: string;
+  father_name: string;
+  exams: MarksExam[];
+}
+export interface ClassSectionMarksheetResponse {
+  students: MarksStudent[];
+  response_code: number;
+  response_message: string;
+}
+
+// POST /Webservice/saveStudentMarksEntry
+export interface SaveMarksPayload {
+  school_id: string | number;
+  session_id: string | number;
+  class_id: string | number;
+  section_id: string | number;
+  exam_master_id: string | number;
+  student_id: string;
+  subject_master_id: string | number;
+  marks_obtained: number;
+}
+export interface SaveMarksResponse {
+  student_id: string;
+  subject_master_id: number;
+  exam_master_id: number;
+  marks_obtained: number;
+  response_code: number;
+  response_message: string;
 }
