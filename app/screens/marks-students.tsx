@@ -179,9 +179,6 @@ const toastS = StyleSheet.create({
 
 // ═══════════════════════════════════════════════════════
 // SUBJECT-WISE TAB
-// — Horizontal subject chips on top
-// — Click a chip → show all students for that subject
-//   with editable marks_obtained field + auto-save
 // ═══════════════════════════════════════════════════════
 interface SubjectWiseProps {
     students: MarksStudent[];
@@ -235,6 +232,10 @@ function SubjectWiseTab({ students, params, user, onToast }: SubjectWiseProps) {
         subjects[0]?.subject_id ?? "",
     );
 
+    // ── Search + Sort state (mirrors student-wise tab) ──
+    const [search, setSearch] = useState("");
+    const [sortKey, setSortKey] = useState<SortKey>("name_asc");
+
     // Local marks map: studentId → subjectId → value
     const [marksMap, setMarksMap] = useState<
         Record<string, Record<string, string>>
@@ -251,7 +252,6 @@ function SubjectWiseTab({ students, params, user, onToast }: SubjectWiseProps) {
 
     const [saving, setSaving] = useState<Record<string, boolean>>({});
     const [saved, setSaved] = useState<Record<string, boolean>>(() => {
-        // pre-mark all as saved (data came from API)
         const init: Record<string, boolean> = {};
         students.forEach((s) => {
             s.exams[0]?.subjects.forEach((sub) => {
@@ -297,6 +297,17 @@ function SubjectWiseTab({ students, params, user, onToast }: SubjectWiseProps) {
         [user, params, onToast],
     );
 
+    // ── Filter + Sort students (same logic as student-wise) ──
+    const filteredStudents = useMemo(() => {
+        const filtered = students.filter(
+            (s) =>
+                !search ||
+                s.student_name.toLowerCase().includes(search.toLowerCase()) ||
+                s.admission_no.toLowerCase().includes(search.toLowerCase()),
+        );
+        return sortStudents(filtered, sortKey);
+    }, [students, search, sortKey]);
+
     if (subjects.length === 0) {
         return (
             <View style={{ alignItems: "center", paddingTop: 60 }}>
@@ -315,7 +326,6 @@ function SubjectWiseTab({ students, params, user, onToast }: SubjectWiseProps) {
     );
     const subjectColor = SUBJECT_COLORS[selSubjectIdx % SUBJECT_COLORS.length];
 
-    // Count saved for selected subject
     const savedForSubject = students.filter(
         (s) => saved[`${s.student_id}_${selSubjectId}`],
     ).length;
@@ -336,7 +346,6 @@ function SubjectWiseTab({ students, params, user, onToast }: SubjectWiseProps) {
                     {subjects.map((subject, i) => {
                         const sc = SUBJECT_COLORS[i % SUBJECT_COLORS.length];
                         const isActive = subject.subject_id === selSubjectId;
-                        // Count how many students are saved for this subject
                         const savedCount = students.filter(
                             (s) =>
                                 saved[`${s.student_id}_${subject.subject_id}`],
@@ -361,7 +370,6 @@ function SubjectWiseTab({ students, params, user, onToast }: SubjectWiseProps) {
                                 }
                                 activeOpacity={0.8}
                             >
-                                {/* Icon circle */}
                                 <View
                                     style={[
                                         sw.chipIconWrap,
@@ -420,7 +428,7 @@ function SubjectWiseTab({ students, params, user, onToast }: SubjectWiseProps) {
                 </ScrollView>
             </View>
 
-            {/* ── Selected subject header ── */}
+            {/* ── Selected subject banner ── */}
             <LinearGradient
                 colors={subjectColor.grad}
                 style={sw.selSubjectBanner}
@@ -445,14 +453,72 @@ function SubjectWiseTab({ students, params, user, onToast }: SubjectWiseProps) {
                 </View>
             </LinearGradient>
 
+            {/* ── Search + Sort (mirrors student-wise controls) ── */}
+            <View style={styles.controlsWrap}>
+                <View style={styles.searchBar}>
+                    <Text style={{ fontSize: 15 }}>🔍</Text>
+                    <TextInput
+                        style={styles.searchInput}
+                        value={search}
+                        onChangeText={setSearch}
+                        placeholder="Search by name or admission no…"
+                        placeholderTextColor={Colors.text3}
+                    />
+                    {search ? (
+                        <TouchableOpacity
+                            onPress={() => setSearch("")}
+                            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                        >
+                            <Text style={{ color: Colors.text3, fontSize: 16 }}>
+                                ✕
+                            </Text>
+                        </TouchableOpacity>
+                    ) : null}
+                </View>
+
+                <View style={styles.sortRow}>
+                    <Text style={styles.sortLabel}>Sort by:</Text>
+                    <ScrollView
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        contentContainerStyle={{ gap: 6 }}
+                    >
+                        {SORT_OPTIONS.map((opt) => (
+                            <TouchableOpacity
+                                key={opt.key}
+                                style={[
+                                    styles.sortChip,
+                                    sortKey === opt.key &&
+                                        styles.sortChipActive,
+                                ]}
+                                onPress={() => setSortKey(opt.key)}
+                                activeOpacity={0.8}
+                            >
+                                <Text
+                                    style={[
+                                        styles.sortChipTxt,
+                                        sortKey === opt.key &&
+                                            styles.sortChipTxtActive,
+                                    ]}
+                                >
+                                    {sortKey === opt.key ? "✓ " : ""}
+                                    {opt.label}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
+                    </ScrollView>
+                </View>
+            </View>
+
             {/* ── Column headers ── */}
             <View style={sw.colHeader}>
-                <Text style={[sw.colTxt, { flex: 1 }]}>Student</Text>
+                <Text style={[sw.colTxt, { flex: 1 }]}>
+                    Student
+                    {search ? ` (${filteredStudents.length} results)` : ""}
+                </Text>
                 <Text style={[sw.colTxt, { width: 70, textAlign: "center" }]}>
                     Marks
                 </Text>
-                {/* <Text style={[sw.colTxt, { width: 44, textAlign: 'center' }]}>%</Text>
-        <Text style={[sw.colTxt, { width: 38, textAlign: 'center' }]}>Grade</Text> */}
             </View>
 
             {/* ── Student list for selected subject ── */}
@@ -460,243 +526,206 @@ function SubjectWiseTab({ students, params, user, onToast }: SubjectWiseProps) {
                 showsVerticalScrollIndicator={false}
                 keyboardShouldPersistTaps="handled"
                 contentContainerStyle={{ paddingBottom: 40 }}
+                scrollEnabled={false}
             >
-                {students.map((student, idx) => {
-                    const key = `${student.student_id}_${selSubjectId}`;
-                    const val =
-                        marksMap[student.student_id]?.[selSubjectId] ?? "";
-                    const obtained = parseInt(val) || 0;
-                    const { pct, grade } = calcGrade(
-                        obtained,
-                        selSubject.max_marks,
-                    );
-                    const isErr = obtained > selSubject.max_marks;
-                    const isSaving = saving[key];
-                    const isSaved = saved[key];
-                    const gc = gradeStyle(grade);
-                    const barClr = pctColor(pct);
-                    const pctNum = parseFloat(pct);
-                    const initials = student.student_name
-                        .trim()
-                        .split(" ")
-                        .map((w: string) => w[0])
-                        .join("")
-                        .slice(0, 2)
-                        .toUpperCase();
+                {filteredStudents.length === 0 ? (
+                    <View style={styles.emptyWrap}>
+                        <Text style={{ fontSize: 36, marginBottom: 10 }}>
+                            🔍
+                        </Text>
+                        <Text style={{ color: Colors.text3, fontSize: 14 }}>
+                            No students found
+                        </Text>
+                    </View>
+                ) : (
+                    filteredStudents.map((student, idx) => {
+                        const key = `${student.student_id}_${selSubjectId}`;
+                        const val =
+                            marksMap[student.student_id]?.[selSubjectId] ?? "";
+                        const obtained = parseInt(val) || 0;
+                        const { pct, grade } = calcGrade(
+                            obtained,
+                            selSubject.max_marks,
+                        );
+                        const isErr = obtained > selSubject.max_marks;
+                        const isSaving = saving[key];
+                        const isSaved = saved[key];
+                        const gc = gradeStyle(grade);
+                        const barClr = pctColor(pct);
+                        const pctNum = parseFloat(pct);
+                        const initials = student.student_name
+                            .trim()
+                            .split(" ")
+                            .map((w: string) => w[0])
+                            .join("")
+                            .slice(0, 2)
+                            .toUpperCase();
 
-                    return (
-                        <View
-                            key={student.student_id}
-                            style={[sw.studentRow, idx % 2 === 1 && sw.rowAlt]}
-                        >
-                            {/* Left border accent */}
+                        return (
                             <View
+                                key={student.student_id}
                                 style={[
-                                    sw.leftAccent,
-                                    {
-                                        backgroundColor:
-                                            isSaved && !isErr
-                                                ? Colors.green
-                                                : isErr
-                                                  ? Colors.red
-                                                  : Colors.border,
-                                    },
-                                ]}
-                            />
-
-                            {/* Avatar */}
-                            <View
-                                style={[
-                                    sw.miniAvatar,
-                                    {
-                                        backgroundColor:
-                                            isSaved && !isErr
-                                                ? Colors.greenBg
-                                                : isErr
-                                                  ? Colors.redBg
-                                                  : Colors.purpleBg,
-                                    },
+                                    sw.studentRow,
+                                    idx % 2 === 1 && sw.rowAlt,
                                 ]}
                             >
-                                {isSaving ? (
-                                    <ActivityIndicator
-                                        size="small"
-                                        color={Colors.purple}
-                                    />
-                                ) : (
-                                    <Text
-                                        style={[
-                                            sw.miniAvatarTxt,
-                                            {
-                                                color:
-                                                    isSaved && !isErr
-                                                        ? Colors.green
-                                                        : isErr
-                                                          ? Colors.red
-                                                          : Colors.purple,
-                                            },
-                                        ]}
-                                    >
-                                        {isSaved && !isErr ? "✓" : initials}
-                                    </Text>
-                                )}
-                            </View>
-
-                            {/* Name + admission */}
-                            <View style={{ flex: 1, minWidth: 0 }}>
-                                <Text style={sw.studentName} numberOfLines={1}>
-                                    {student.student_name.trim()}
-                                </Text>
-
-                                <View style={styles.metaRow}>
-                                    <Text style={styles.metaChip}>
-                                        #{student.admission_no}
-                                    </Text>
-                                    {student.father_name ? (
-                                        <Text style={styles.metaGray}>
-                                            👤 {student.father_name}
-                                        </Text>
-                                    ) : null}
-                                </View>
-                            </View>
-
-                            {/* Marks input */}
-                            <View style={{ width: 70, alignItems: "center" }}>
+                                {/* Left border accent */}
                                 <View
                                     style={[
-                                        sw.inputWrap,
+                                        sw.leftAccent,
                                         {
-                                            borderColor: isErr
-                                                ? Colors.red
-                                                : isSaved
-                                                  ? Colors.green
-                                                  : Colors.border,
+                                            backgroundColor:
+                                                isSaved && !isErr
+                                                    ? Colors.green
+                                                    : isErr
+                                                      ? Colors.red
+                                                      : Colors.border,
                                         },
-                                        isErr && sw.inputErr,
+                                    ]}
+                                />
+
+                                {/* Avatar */}
+                                <View
+                                    style={[
+                                        sw.miniAvatar,
+                                        {
+                                            backgroundColor:
+                                                isSaved && !isErr
+                                                    ? Colors.greenBg
+                                                    : isErr
+                                                      ? Colors.redBg
+                                                      : Colors.purpleBg,
+                                        },
                                     ]}
                                 >
-                                    <TextInput
+                                    {isSaving ? (
+                                        <ActivityIndicator
+                                            size="small"
+                                            color={Colors.purple}
+                                        />
+                                    ) : (
+                                        <Text
+                                            style={[
+                                                sw.miniAvatarTxt,
+                                                {
+                                                    color:
+                                                        isSaved && !isErr
+                                                            ? Colors.green
+                                                            : isErr
+                                                              ? Colors.red
+                                                              : Colors.purple,
+                                                },
+                                            ]}
+                                        >
+                                            {isSaved && !isErr ? "✓" : initials}
+                                        </Text>
+                                    )}
+                                </View>
+
+                                {/* Name + admission */}
+                                <View style={{ flex: 1, minWidth: 0 }}>
+                                    <Text
+                                        style={sw.studentName}
+                                        numberOfLines={1}
+                                    >
+                                        {student.student_name.trim()}
+                                    </Text>
+
+                                    <View style={styles.metaRow}>
+                                        <Text style={styles.metaChip}>
+                                            #{student.admission_no}
+                                        </Text>
+                                        {student.father_name ? (
+                                            <Text style={styles.metaGray}>
+                                                👤 {student.father_name}
+                                            </Text>
+                                        ) : null}
+                                    </View>
+                                </View>
+
+                                {/* Marks input */}
+                                <View
+                                    style={{ width: 70, alignItems: "center" }}
+                                >
+                                    <View
                                         style={[
-                                            sw.input,
+                                            sw.inputWrap,
+                                            {
+                                                borderColor: isErr
+                                                    ? Colors.red
+                                                    : isSaved
+                                                      ? Colors.green
+                                                      : Colors.border,
+                                            },
+                                            isErr && sw.inputErr,
+                                        ]}
+                                    >
+                                        <TextInput
+                                            style={[
+                                                sw.input,
+                                                {
+                                                    color: isErr
+                                                        ? Colors.red
+                                                        : Colors.text1,
+                                                    padding: 0,
+                                                },
+                                            ]}
+                                            textAlignVertical="center"
+                                            value={val}
+                                            onChangeText={(v) => {
+                                                const clean = v.replace(
+                                                    /[^0-9]/g,
+                                                    "",
+                                                );
+                                                setMarksMap((prev) => ({
+                                                    ...prev,
+                                                    [student.student_id]: {
+                                                        ...prev[
+                                                            student.student_id
+                                                        ],
+                                                        [selSubjectId]: clean,
+                                                    },
+                                                }));
+                                                setSaved((p) => ({
+                                                    ...p,
+                                                    [key]: false,
+                                                }));
+                                            }}
+                                            onBlur={() => {
+                                                if (!isErr && val !== "")
+                                                    saveOne(
+                                                        student,
+                                                        selSubject,
+                                                        val,
+                                                    );
+                                            }}
+                                            keyboardType="numeric"
+                                            maxLength={3}
+                                            selectTextOnFocus
+                                            placeholder="—"
+                                            placeholderTextColor={Colors.text3}
+                                            editable={!isSaving}
+                                        />
+                                    </View>
+                                    <Text
+                                        style={[
+                                            sw.maxMarkTxt,
                                             {
                                                 color: isErr
                                                     ? Colors.red
-                                                    : Colors.text1,
-                                                padding: 0,
+                                                    : Colors.text3,
                                             },
                                         ]}
-                                        textAlignVertical="center"
-                                        value={val}
-                                        onChangeText={(v) => {
-                                            const clean = v.replace(
-                                                /[^0-9]/g,
-                                                "",
-                                            );
-                                            setMarksMap((prev) => ({
-                                                ...prev,
-                                                [student.student_id]: {
-                                                    ...prev[student.student_id],
-                                                    [selSubjectId]: clean,
-                                                },
-                                            }));
-                                            setSaved((p) => ({
-                                                ...p,
-                                                [key]: false,
-                                            }));
-                                        }}
-                                        onBlur={() => {
-                                            if (!isErr && val !== "")
-                                                saveOne(
-                                                    student,
-                                                    selSubject,
-                                                    val,
-                                                );
-                                        }}
-                                        keyboardType="numeric"
-                                        maxLength={3}
-                                        selectTextOnFocus
-                                        placeholder="—"
-                                        placeholderTextColor={Colors.text3}
-                                        editable={!isSaving}
-                                    />
-                                </View>
-                                <Text
-                                    style={[
-                                        sw.maxMarkTxt,
-                                        {
-                                            color: isErr
-                                                ? Colors.red
-                                                : Colors.text3,
-                                        },
-                                    ]}
-                                >
-                                    {isErr
-                                        ? "Max: " + selSubject.max_marks
-                                        : `/ ${selSubject.max_marks}`}
-                                </Text>
-                            </View>
-
-                            {/* Percentage */}
-                            {/* <View style={{ width: 44, alignItems: "center" }}>
-                                <Text
-                                    style={[
-                                        sw.pctTxt,
-                                        { color: isErr ? Colors.red : barClr },
-                                    ]}
-                                >
-                                    {val === "" ? "—" : isErr ? "⚠" : `${pct}%`}
-                                </Text>
-                                {!isErr && val !== "" && (
-                                    <View
-                                        style={{
-                                            height: 3,
-                                            width: 32,
-                                            backgroundColor: Colors.border,
-                                            borderRadius: 2,
-                                            overflow: "hidden",
-                                            marginTop: 3,
-                                        }}
                                     >
-                                        <View
-                                            style={{
-                                                width: `${Math.min(pctNum, 100)}%`,
-                                                height: 3,
-                                                backgroundColor: barClr,
-                                                borderRadius: 2,
-                                            }}
-                                        />
-                                    </View>
-                                )}
-                            </View> */}
-
-                            {/* Grade */}
-                            {/* <View
-                                style={[
-                                    sw.gradeChip,
-                                    {
-                                        width: 38,
-                                        backgroundColor:
-                                            val === "" ? Colors.surface : gc.bg,
-                                    },
-                                ]}
-                            >
-                                <Text
-                                    style={[
-                                        sw.gradeChipTxt,
-                                        {
-                                            color:
-                                                val === ""
-                                                    ? Colors.text3
-                                                    : gc.text,
-                                        },
-                                    ]}
-                                >
-                                    {val === "" ? "—" : grade}
-                                </Text>
-                            </View> */}
-                        </View>
-                    );
-                })}
+                                        {isErr
+                                            ? "Max: " + selSubject.max_marks
+                                            : `/ ${selSubject.max_marks}`}
+                                    </Text>
+                                </View>
+                            </View>
+                        );
+                    })
+                )}
             </ScrollView>
         </View>
     );
@@ -1068,259 +1097,298 @@ export default function MarksStudentsScreen() {
                     </TouchableOpacity>
                 ))}
             </View>
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{}}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                        tintColor={Colors.purple}
+                    />
+                }
+            >
+                {/* ── Search + Sort (student tab only) ── */}
+                {activeTab === "student" && (
+                    <View style={styles.controlsWrap}>
+                        <View style={styles.searchBar}>
+                            <Text style={{ fontSize: 15 }}>🔍</Text>
+                            <TextInput
+                                style={styles.searchInput}
+                                value={search}
+                                onChangeText={setSearch}
+                                placeholder="Search by name or admission no…"
+                                placeholderTextColor={Colors.text3}
+                            />
+                            {search ? (
+                                <TouchableOpacity
+                                    onPress={() => setSearch("")}
+                                    hitSlop={{
+                                        top: 8,
+                                        bottom: 8,
+                                        left: 8,
+                                        right: 8,
+                                    }}
+                                >
+                                    <Text
+                                        style={{
+                                            color: Colors.text3,
+                                            fontSize: 16,
+                                        }}
+                                    >
+                                        ✕
+                                    </Text>
+                                </TouchableOpacity>
+                            ) : null}
+                        </View>
 
-            {/* ── Search + Sort (student tab only) ── */}
-            {activeTab === "student" && (
-                <View style={styles.controlsWrap}>
-                    <View style={styles.searchBar}>
-                        <Text style={{ fontSize: 15 }}>🔍</Text>
-                        <TextInput
-                            style={styles.searchInput}
-                            value={search}
-                            onChangeText={setSearch}
-                            placeholder="Search by name or admission no…"
-                            placeholderTextColor={Colors.text3}
-                        />
-                        {search ? (
-                            <TouchableOpacity
-                                onPress={() => setSearch("")}
-                                hitSlop={{
-                                    top: 8,
-                                    bottom: 8,
-                                    left: 8,
-                                    right: 8,
-                                }}
+                        {/* Sort row */}
+                        <View style={styles.sortRow}>
+                            <Text style={styles.sortLabel}>Sort by:</Text>
+                            <ScrollView
+                                horizontal
+                                showsHorizontalScrollIndicator={false}
+                                contentContainerStyle={{ gap: 6 }}
                             >
+                                {SORT_OPTIONS.map((opt) => (
+                                    <TouchableOpacity
+                                        key={opt.key}
+                                        style={[
+                                            styles.sortChip,
+                                            sortKey === opt.key &&
+                                                styles.sortChipActive,
+                                        ]}
+                                        onPress={() => setSortKey(opt.key)}
+                                        activeOpacity={0.8}
+                                    >
+                                        <Text
+                                            style={[
+                                                styles.sortChipTxt,
+                                                sortKey === opt.key &&
+                                                    styles.sortChipTxtActive,
+                                            ]}
+                                        >
+                                            {sortKey === opt.key ? "✓ " : ""}
+                                            {opt.label}
+                                        </Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </ScrollView>
+                        </View>
+                    </View>
+                )}
+
+                {/* ── Body ── */}
+                {loading ? (
+                    <View style={styles.centered}>
+                        <ActivityIndicator size="large" color={Colors.purple} />
+                        <Text style={styles.loadTxt}>Loading marksheet…</Text>
+                    </View>
+                ) : error ? (
+                    <View style={styles.centered}>
+                        <Text style={{ fontSize: 36, marginBottom: 12 }}>
+                            ⚠️
+                        </Text>
+                        <Text style={styles.errTitle}>
+                            Could not load students
+                        </Text>
+                        <Text style={styles.errMsg}>{error}</Text>
+                        <TouchableOpacity
+                            style={styles.retryBtn}
+                            onPress={() => fetchData()}
+                            activeOpacity={0.8}
+                        >
+                            <Text style={styles.retryTxt}>Try Again</Text>
+                        </TouchableOpacity>
+                    </View>
+                ) : activeTab === "subject" ? (
+                    <View style={{ flex: 1 }}>
+                        <SubjectWiseTab
+                            students={students}
+                            params={params as any}
+                            user={user}
+                            onToast={flashToast}
+                        />
+                    </View>
+                ) : (
+                    // ── Student-wise tab ──────────────────────────────────
+                    <ScrollView
+                        scrollEnabled={false}
+                        showsVerticalScrollIndicator={false}
+                        contentContainerStyle={{
+                            padding: Spacing.lg,
+                            paddingTop: 8,
+                            gap: 8,
+                            paddingBottom: 32,
+                        }}
+                        // refreshControl={
+                        //     <RefreshControl
+                        //         refreshing={refreshing}
+                        //         onRefresh={onRefresh}
+                        //         tintColor={Colors.purple}
+                        //     />
+                        // }
+                    >
+                        {search ? (
+                            <Text style={styles.resultCount}>
+                                {processed.length} result
+                                {processed.length !== 1 ? "s" : ""}
+                            </Text>
+                        ) : null}
+
+                        {processed.length === 0 ? (
+                            <View style={styles.emptyWrap}>
+                                <Text
+                                    style={{ fontSize: 36, marginBottom: 10 }}
+                                >
+                                    🔍
+                                </Text>
                                 <Text
                                     style={{
                                         color: Colors.text3,
-                                        fontSize: 16,
+                                        fontSize: 14,
                                     }}
                                 >
-                                    ✕
+                                    No students found
                                 </Text>
-                            </TouchableOpacity>
-                        ) : null}
-                    </View>
+                            </View>
+                        ) : (
+                            processed.map((student) => {
+                                const exam = student.exams[0];
+                                const pct = exam
+                                    ? parseFloat(exam.percentage)
+                                    : 0;
+                                const barClr = pctColor(
+                                    exam?.percentage ?? "0",
+                                );
+                                const gs = gradeStyle(exam?.grade_name ?? "");
+                                const initials = student.student_name
+                                    .trim()
+                                    .split(" ")
+                                    .map((w: string) => w[0])
+                                    .join("")
+                                    .slice(0, 2)
+                                    .toUpperCase();
 
-                    {/* Sort row */}
-                    <View style={styles.sortRow}>
-                        <Text style={styles.sortLabel}>Sort by:</Text>
-                        <ScrollView
-                            horizontal
-                            showsHorizontalScrollIndicator={false}
-                            contentContainerStyle={{ gap: 6 }}
-                        >
-                            {SORT_OPTIONS.map((opt) => (
-                                <TouchableOpacity
-                                    key={opt.key}
-                                    style={[
-                                        styles.sortChip,
-                                        sortKey === opt.key &&
-                                            styles.sortChipActive,
-                                    ]}
-                                    onPress={() => setSortKey(opt.key)}
-                                    activeOpacity={0.8}
-                                >
-                                    <Text
-                                        style={[
-                                            styles.sortChipTxt,
-                                            sortKey === opt.key &&
-                                                styles.sortChipTxtActive,
-                                        ]}
-                                    >
-                                        {sortKey === opt.key ? "✓ " : ""}
-                                        {opt.label}
-                                    </Text>
-                                </TouchableOpacity>
-                            ))}
-                        </ScrollView>
-                    </View>
-                </View>
-            )}
-
-            {/* ── Body ── */}
-            {loading ? (
-                <View style={styles.centered}>
-                    <ActivityIndicator size="large" color={Colors.purple} />
-                    <Text style={styles.loadTxt}>Loading marksheet…</Text>
-                </View>
-            ) : error ? (
-                <View style={styles.centered}>
-                    <Text style={{ fontSize: 36, marginBottom: 12 }}>⚠️</Text>
-                    <Text style={styles.errTitle}>Could not load students</Text>
-                    <Text style={styles.errMsg}>{error}</Text>
-                    <TouchableOpacity
-                        style={styles.retryBtn}
-                        onPress={() => fetchData()}
-                        activeOpacity={0.8}
-                    >
-                        <Text style={styles.retryTxt}>Try Again</Text>
-                    </TouchableOpacity>
-                </View>
-            ) : activeTab === "subject" ? (
-                <View style={{ flex: 1 }}>
-                    <SubjectWiseTab
-                        students={students}
-                        params={params as any}
-                        user={user}
-                        onToast={flashToast}
-                    />
-                </View>
-            ) : (
-                // ── Student-wise tab ──────────────────────────────────
-                <ScrollView
-                    showsVerticalScrollIndicator={false}
-                    contentContainerStyle={{
-                        padding: Spacing.lg,
-                        paddingTop: 8,
-                        gap: 8,
-                        paddingBottom: 32,
-                    }}
-                    refreshControl={
-                        <RefreshControl
-                            refreshing={refreshing}
-                            onRefresh={onRefresh}
-                            tintColor={Colors.purple}
-                        />
-                    }
-                >
-                    {search ? (
-                        <Text style={styles.resultCount}>
-                            {processed.length} result
-                            {processed.length !== 1 ? "s" : ""}
-                        </Text>
-                    ) : null}
-
-                    {processed.length === 0 ? (
-                        <View style={styles.emptyWrap}>
-                            <Text style={{ fontSize: 36, marginBottom: 10 }}>
-                                🔍
-                            </Text>
-                            <Text style={{ color: Colors.text3, fontSize: 14 }}>
-                                No students found
-                            </Text>
-                        </View>
-                    ) : (
-                        processed.map((student) => {
-                            const exam = student.exams[0];
-                            const pct = exam ? parseFloat(exam.percentage) : 0;
-                            const barClr = pctColor(exam?.percentage ?? "0");
-                            const gs = gradeStyle(exam?.grade_name ?? "");
-                            const initials = student.student_name
-                                .trim()
-                                .split(" ")
-                                .map((w: string) => w[0])
-                                .join("")
-                                .slice(0, 2)
-                                .toUpperCase();
-
-                            return (
-                                <TouchableOpacity
-                                    key={student.student_session_id}
-                                    style={styles.studentCard}
-                                    onPress={() =>
-                                        router.push({
-                                            pathname: "/screens/marks-form",
-                                            params: {
-                                                student_data:
-                                                    JSON.stringify(student),
-                                                exam_name,
-                                                class_name,
-                                                section_name,
-                                                class_id,
-                                                section_id,
-                                                exam_master_id:
-                                                    params.exam_master_id ??
-                                                    exam_id,
-                                            },
-                                        })
-                                    }
-                                    activeOpacity={0.82}
-                                >
-                                    <View style={styles.cardLeft}>
-                                        <View
-                                            style={[
-                                                styles.avatar,
-                                                {
-                                                    backgroundColor:
-                                                        Colors.purpleBg,
+                                return (
+                                    <TouchableOpacity
+                                        key={student.student_session_id}
+                                        style={styles.studentCard}
+                                        onPress={() =>
+                                            router.push({
+                                                pathname: "/screens/marks-form",
+                                                params: {
+                                                    student_data:
+                                                        JSON.stringify(student),
+                                                    exam_name,
+                                                    class_name,
+                                                    section_name,
+                                                    class_id,
+                                                    section_id,
+                                                    exam_master_id:
+                                                        params.exam_master_id ??
+                                                        exam_id,
                                                 },
-                                            ]}
-                                        >
-                                            <Text style={styles.avatarTxt}>
-                                                {initials}
-                                            </Text>
-                                        </View>
-                                        <View style={{ flex: 1 }}>
-                                            <Text style={styles.studentName}>
-                                                {student.student_name.trim()}
-                                            </Text>
-                                            <View style={styles.metaRow}>
-                                                <Text style={styles.metaChip}>
-                                                    #{student.admission_no}
-                                                </Text>
-                                                {student.father_name ? (
-                                                    <Text
-                                                        style={styles.metaGray}
-                                                    >
-                                                        👤 {student.father_name}
-                                                    </Text>
-                                                ) : null}
-                                            </View>
-                                        </View>
-                                    </View>
-
-                                    <View style={styles.cardRight}>
-                                        <View
-                                            style={[
-                                                styles.gradeBadge,
-                                                { backgroundColor: gs.bg },
-                                            ]}
-                                        >
-                                            <Text
+                                            })
+                                        }
+                                        activeOpacity={0.82}
+                                    >
+                                        <View style={styles.cardLeft}>
+                                            <View
                                                 style={[
-                                                    styles.gradeText,
-                                                    { color: gs.text },
+                                                    styles.avatar,
+                                                    {
+                                                        backgroundColor:
+                                                            Colors.purpleBg,
+                                                    },
                                                 ]}
                                             >
-                                                {exam?.grade_name ?? "—"}
+                                                <Text style={styles.avatarTxt}>
+                                                    {initials}
+                                                </Text>
+                                            </View>
+                                            <View style={{ flex: 1 }}>
+                                                <Text
+                                                    style={styles.studentName}
+                                                >
+                                                    {student.student_name.trim()}
+                                                </Text>
+                                                <View style={styles.metaRow}>
+                                                    <Text
+                                                        style={styles.metaChip}
+                                                    >
+                                                        #{student.admission_no}
+                                                    </Text>
+                                                    {student.father_name ? (
+                                                        <Text
+                                                            style={
+                                                                styles.metaGray
+                                                            }
+                                                        >
+                                                            👤{" "}
+                                                            {
+                                                                student.father_name
+                                                            }
+                                                        </Text>
+                                                    ) : null}
+                                                </View>
+                                            </View>
+                                        </View>
+
+                                        <View style={styles.cardRight}>
+                                            <View
+                                                style={[
+                                                    styles.gradeBadge,
+                                                    { backgroundColor: gs.bg },
+                                                ]}
+                                            >
+                                                <Text
+                                                    style={[
+                                                        styles.gradeText,
+                                                        { color: gs.text },
+                                                    ]}
+                                                >
+                                                    {exam?.grade_name ?? "—"}
+                                                </Text>
+                                            </View>
+                                            <Text
+                                                style={[
+                                                    styles.scoreText,
+                                                    { color: barClr },
+                                                ]}
+                                            >
+                                                {exam
+                                                    ? `${exam.marks_obtained}/${exam.max_marks}`
+                                                    : "—"}
+                                            </Text>
+                                            <Text
+                                                style={[
+                                                    styles.pctText,
+                                                    { color: barClr },
+                                                ]}
+                                            >
+                                                {exam?.percentage ?? "0"}%
                                             </Text>
                                         </View>
-                                        <Text
-                                            style={[
-                                                styles.scoreText,
-                                                { color: barClr },
-                                            ]}
-                                        >
-                                            {exam
-                                                ? `${exam.marks_obtained}/${exam.max_marks}`
-                                                : "—"}
-                                        </Text>
-                                        <Text
-                                            style={[
-                                                styles.pctText,
-                                                { color: barClr },
-                                            ]}
-                                        >
-                                            {exam?.percentage ?? "0"}%
-                                        </Text>
-                                    </View>
 
-                                    <View
-                                        style={{ width: "100%", marginTop: 4 }}
-                                    >
-                                        <Bar pct={pct} color={barClr} />
-                                        <Text style={styles.editHint}>
-                                            Tap to edit marks →
-                                        </Text>
-                                    </View>
-                                </TouchableOpacity>
-                            );
-                        })
-                    )}
-                </ScrollView>
-            )}
+                                        <View
+                                            style={{
+                                                width: "100%",
+                                                marginTop: 4,
+                                            }}
+                                        >
+                                            <Bar pct={pct} color={barClr} />
+                                            <Text style={styles.editHint}>
+                                                Tap to edit marks →
+                                            </Text>
+                                        </View>
+                                    </TouchableOpacity>
+                                );
+                            })
+                        )}
+                    </ScrollView>
+                )}
+            </ScrollView>
 
             {/* Toast */}
             <SaveToast visible={showToast} />
@@ -1414,7 +1482,7 @@ const styles = StyleSheet.create({
     tabTxt: { fontSize: 13, fontWeight: "600", color: Colors.text3 },
     tabTxtActive: { color: Colors.purple, fontWeight: "800" },
 
-    // Controls
+    // Controls — shared between student-wise and subject-wise
     controlsWrap: {
         backgroundColor: Colors.surface,
         paddingHorizontal: Spacing.lg,
