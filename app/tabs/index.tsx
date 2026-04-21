@@ -37,11 +37,11 @@ const FEATURE_CARDS = [
     // },
     {
         icon: "📊",
-        title: "Marks",
-        sub: "Gradebook & exams",
-        badge: "Enter grades",
+        title: "Exam",
+        sub: "Marks Entry, Grade etc.",
+        badge: "More",
         style: { bg: "#e7f9f0", color: Colors.green, border: "#a8e8cc" },
-        route: "/screens/marks-entry",
+        route: "/screens/exam",
     },
     // {
     //     icon: "🗓️",
