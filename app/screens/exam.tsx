@@ -35,14 +35,14 @@ const EXAM_FEATURES = [
     {
         icon: "🏆",
         title: "Grade Report",
-        sub: "View compiled grades and performance summary",
-        badge: "Coming Soon",
+        sub: "Enter co-scholastic grades for activities & skills",
+        badge: "Enter Now",
         bg: "#f0e8fd",
         border: "#d8c5f7",
         iconBg: Colors.purpleBg,
         color: Colors.purple,
         accentColor: Colors.purple,
-        route: null,
+        route: "/screens/coscholastic-entry",
     },
     {
         icon: "✅",
@@ -99,20 +99,6 @@ export default function ExamScreen() {
                 <Text style={styles.heroSub}>
                     Marks, grades, attendance & feedback
                 </Text>
-
-                {/* Stats strip */}
-                {/* <View style={styles.statsRow}>
-          {[
-            { label: 'Classes', val: '5', color: '#c4b5fd' },
-            { label: 'Exams',   val: '6', color: '#6ee7b7' },
-            { label: 'Students',val: '148', color: '#fcd34d' },
-          ].map((s, i) => (
-            <View key={i} style={styles.statPill}>
-              <Text style={[styles.statVal, { color: s.color }]}>{s.val}</Text>
-              <Text style={styles.statLbl}>{s.label}</Text>
-            </View>
-          ))}
-        </View> */}
             </LinearGradient>
 
             {/* ── Feature Cards ── */}
@@ -270,22 +256,6 @@ const styles = StyleSheet.create({
         marginTop: 4,
         marginBottom: 20,
         zIndex: 1,
-    },
-
-    statsRow: { flexDirection: "row", gap: 10, zIndex: 1 },
-    statPill: {
-        flex: 1,
-        backgroundColor: "rgba(255,255,255,0.12)",
-        borderRadius: 14,
-        paddingVertical: 12,
-        alignItems: "center",
-    },
-    statVal: { fontSize: 20, fontWeight: "900" },
-    statLbl: {
-        fontSize: 10,
-        fontWeight: "600",
-        color: "rgba(255,255,255,0.6)",
-        marginTop: 2,
     },
 
     // Cards

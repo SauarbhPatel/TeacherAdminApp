@@ -64,6 +64,8 @@ function RootNavigator() {
                     <Stack.Screen name="screens/timetable" />
                     <Stack.Screen name="screens/notices" />
                     <Stack.Screen name="screens/attendance-confirm" />
+                    <Stack.Screen name="screens/coscholastic-entry" />
+                    <Stack.Screen name="screens/coscholastic-students" />
                 </>
             )}
         </Stack>

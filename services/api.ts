@@ -18,7 +18,7 @@ const DEFAULT_HEADERS: Record<string, string> = {
   // "Schoolid": "86"
 };
 
-export function buildHeaders(token?: string,school_id?:string): Record<string, string> {
+export function buildHeaders(token?: string,school_id?: string | number): Record<string, string> {
   const headers: Record<string, string> = { ...DEFAULT_HEADERS };
   if (token) {
     // Use the short token from login response as Bearer
@@ -26,7 +26,7 @@ export function buildHeaders(token?: string,school_id?:string): Record<string, s
     headers['token'] = token;
   }
   if (school_id) {
-    headers['Schoolid'] = school_id;
+    headers['Schoolid'] = String(school_id);
   }
   return headers;
 }
@@ -153,6 +153,10 @@ import type {
   ClassSectionMarksheetResponse,
   SaveMarksPayload,
   SaveMarksResponse,
+  CoscholasticMarksEntryResponse,
+  SaveCoscholasticPayload,
+  SaveCoscholasticResponse,
+  CoscholasticExamListResponse,
 } from '@/types';
 
 /**
@@ -215,6 +219,61 @@ export async function saveStudentMarksEntry(
   token: string
 ): Promise<SaveMarksResponse> {
   return apiFetch<SaveMarksResponse>('/Webservice/saveStudentMarksEntry', {
+    method: 'POST',
+    headers: buildHeaders(token),
+    body: JSON.stringify(payload),
+  });
+}
+
+
+// ═══════════════════════════════════════════════════════
+// CO-SCHOLASTIC GRADE REPORT
+// ═══════════════════════════════════════════════════════
+
+/**
+ * GET Co-Scholastic exam list for a class/section.
+ * POST /Webservice/getCoscholasticExamByClass
+ */
+export async function getCoscholasticExamList(payload: {
+  school_id: string | number;
+  session_id: string | number;
+  class_id: string | number;
+  section_id: string | number;
+}, token: string): Promise<CoscholasticExamListResponse> {
+  return apiFetch<CoscholasticExamListResponse>('/Webservice/getCoscholasticExamByClass', {
+    method: 'POST',
+    headers: buildHeaders(token),
+    body: JSON.stringify(payload),
+  });
+}
+
+/**
+ * GET Co-Scholastic student grades entry for a class/section/exam.
+ * POST /Webservice/getCoscholasticMarksEntry
+ */
+export async function getCoscholasticMarksEntry(payload: {
+  school_id: string | number;
+  session_id: string | number;
+  class_id: string | number;
+  section_id: string | number;
+  exam_id: string | number;
+}, token: string): Promise<CoscholasticMarksEntryResponse> {
+  return apiFetch<CoscholasticMarksEntryResponse>('/Webservice/getCoscholasticMarksEntry', {
+    method: 'POST',
+    headers: buildHeaders(token),
+    body: JSON.stringify(payload),
+  });
+}
+
+/**
+ * Save Co-Scholastic grades for a single student (all subjects at once).
+ * POST /Webservice/saveCoscholasticMarksEntry
+ */
+export async function saveCoscholasticMarksEntry(
+  payload: SaveCoscholasticPayload,
+  token: string,
+): Promise<SaveCoscholasticResponse> {
+  return apiFetch<SaveCoscholasticResponse>('/Webservice/saveCoscholasticMarksEntry', {
     method: 'POST',
     headers: buildHeaders(token),
     body: JSON.stringify(payload),

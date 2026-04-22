@@ -259,3 +259,63 @@ export interface SaveMarksResponse {
   response_code: number;
   response_message: string;
 }
+
+
+// GET /Webservice/getCoscholasticExamByClass
+export interface CoscholasticExamItem {
+  exam_id: string;
+  exam_name: string;
+}
+export interface CoscholasticExamListResponse {
+  exams: CoscholasticExamItem[];
+  response_code: number;
+  response_message: string;
+}
+ 
+// GET /Webservice/getCoscholasticMarksEntry
+export interface CoscholasticSubject {
+  school_id: string;
+  class_id: string;
+  exam_master_id: string;
+  cosubject_master_id: string;
+  exam_name: string;
+  cosubject_code: string;
+  cosubject_name: string;
+  grade: string;
+}
+export interface CoscholasticStudent {
+  student_id: string;
+  school_id: string;
+  session_id: string;
+  section_id: string;
+  admission_no: string;
+  roll_no: string | null;
+  firstname: string;
+  middlename: string | null;
+  lastname: string | null;
+  subjects: CoscholasticSubject[];
+}
+export interface CoscholasticMarksEntryResponse {
+  students: CoscholasticStudent[];
+  response_code: number;
+  response_message: string;
+}
+ 
+// POST /Webservice/saveCoscholasticMarksEntry
+export interface SaveCoscholasticPayload {
+  school_id: string | number;
+  session_id: string | number;
+  class_id: string | number;
+  section_id: string | number;
+  exam_id: string | number;
+  student_ids: number;       // single student id (int)
+  subject_ids: number[];     // array of cosubject_master_id
+  grades: string[];          // parallel array of grade strings
+}
+export interface SaveCoscholasticResponse {
+  status: string;
+  students_count: number;
+  subjects_count: number;
+  response_code: number;
+  response_message: string;
+}
