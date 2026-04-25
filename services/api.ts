@@ -157,6 +157,12 @@ import type {
   SaveCoscholasticPayload,
   SaveCoscholasticResponse,
   CoscholasticExamListResponse,
+  ExamAttendanceResponse,
+  SaveExamAttendancePayload,
+  SaveExamAttendanceResponse,
+  ExamRemarksResponse,
+  SaveExamRemarksPayload,
+  SaveExamRemarksResponse,
 } from '@/types';
 
 /**
@@ -274,6 +280,72 @@ export async function saveCoscholasticMarksEntry(
   token: string,
 ): Promise<SaveCoscholasticResponse> {
   return apiFetch<SaveCoscholasticResponse>('/Webservice/saveCoscholasticMarksEntry', {
+    method: 'POST',
+    headers: buildHeaders(token),
+    body: JSON.stringify(payload),
+  });
+}
+
+/**
+ * GET exam attendance for all students in a class/section/exam.
+ * POST /Webservice/getExamAttendance
+ */
+export async function getExamAttendance(payload: {
+  school_id: string | number;
+  session_id: string | number;
+  class_id: string | number;
+  section_id: string | number;
+  exam_id: string | number;
+}, token: string): Promise<ExamAttendanceResponse> {
+  return apiFetch<ExamAttendanceResponse>('/Webservice/getExamAttendance', {
+    method: 'POST',
+    headers: buildHeaders(token),
+    body: JSON.stringify(payload),
+  });
+}
+ 
+/**
+ * Save exam attendance for one student.
+ * POST /Webservice/saveExamAttendance
+ */
+export async function saveExamAttendance(
+  payload: SaveExamAttendancePayload,
+  token: string,
+): Promise<SaveExamAttendanceResponse> {
+  return apiFetch<SaveExamAttendanceResponse>('/Webservice/saveExamAttendance', {
+    method: 'POST',
+    headers: buildHeaders(token),
+    body: JSON.stringify(payload),
+  });
+}
+ 
+/**
+ * GET exam remarks for all students in a class/section/exam.
+ * POST /Webservice/getStudentExamRemarks
+ */
+export async function getStudentExamRemarks(payload: {
+  school_id: string | number;
+  session_id: string | number;
+  class_id: string | number;
+  section_id: string | number;
+  exam_id: string | number;
+}, token: string): Promise<ExamRemarksResponse> {
+  return apiFetch<ExamRemarksResponse>('/Webservice/getStudentExamRemarks', {
+    method: 'POST',
+    headers: buildHeaders(token),
+    body: JSON.stringify(payload),
+  });
+}
+ 
+/**
+ * Save exam remark for one student.
+ * POST /Webservice/saveExamRemarks
+ */
+export async function saveExamRemarks(
+  payload: SaveExamRemarksPayload,
+  token: string,
+): Promise<SaveExamRemarksResponse> {
+  return apiFetch<SaveExamRemarksResponse>('/Webservice/saveExamRemarks', {
     method: 'POST',
     headers: buildHeaders(token),
     body: JSON.stringify(payload),

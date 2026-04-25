@@ -319,3 +319,91 @@ export interface SaveCoscholasticResponse {
   response_code: number;
   response_message: string;
 }
+
+// GET /Webservice/getExamAttendance
+export interface ExamAttendanceRecord {
+  school_id: string;
+  class_id: string;
+  exam_master_id: string;
+  exam_name: string;
+  classes_held: number | string;
+  classes_attended: number | string;
+  percentage: number | string;
+  weightage: number | string;
+  remarks: number | string;
+}
+export interface ExamAttendanceStudent {
+  student_id: string;
+  school_id: string;
+  session_id: string;
+  section_id: string;
+  admission_no: string;
+  roll_no: string | null;
+  firstname: string;
+  middlename: string | null;
+  lastname: string | null;
+  attendance: ExamAttendanceRecord;
+}
+export interface ExamAttendanceResponse {
+  students: ExamAttendanceStudent[];
+  response_code: number;
+  response_message: string;
+}
+ 
+// POST /Webservice/saveExamAttendance
+export interface SaveExamAttendancePayload {
+  school_id: string | number;
+  session_id: string | number;
+  class_id: string | number;
+  section_id: string | number;
+  exam_id: string | number;
+  student_id: number;
+  classes_held: number;
+  classes_attended: number;
+  remarks: string;
+}
+export interface SaveExamAttendanceResponse {
+  response_code: number;
+  response_message: string;
+}
+ 
+// GET /Webservice/getStudentExamRemarks
+export interface ExamRemarkRecord {
+  school_id: string;
+  class_id: string;
+  exam_master_id: string;
+  exam_name: string;
+  remarks: string;
+}
+export interface ExamRemarksStudent {
+  student_id: string;
+  school_id: string;
+  session_id: string;
+  section_id: string;
+  admission_no: string;
+  roll_no: string | null;
+  firstname: string;
+  middlename: string | null;
+  lastname: string | null;
+  remarks: ExamRemarkRecord;
+}
+export interface ExamRemarksResponse {
+  students: ExamRemarksStudent[];
+  response_code: number;
+  response_message: string;
+}
+ 
+// POST /Webservice/saveExamRemarks
+export interface SaveExamRemarksPayload {
+  school_id: string | number;
+  session_id: string | number;
+  class_id: string | number;
+  section_id: string | number;
+  exam_id: string | number;
+  student_id: number;
+  remark: string;
+}
+export interface SaveExamRemarksResponse {
+  response_code: number;
+  response_message: string;
+}
