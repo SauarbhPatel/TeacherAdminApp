@@ -407,3 +407,60 @@ export interface SaveExamRemarksResponse {
   response_code: number;
   response_message: string;
 }
+
+// ─── ADD TO types/index.ts ───────────────────────────────
+
+export interface HomeworkItem {
+  id: string;
+  subject_id: string;
+  subject_name: string;
+  homework_date: string | null;
+  from_date: string | null;
+  to_date: string | null;
+  submit_date: string | null;
+  description: string | null;
+  document: string | null;
+  image: string | null;
+  class_id: string;
+  section_id: string;
+}
+
+export interface HomeworkDashboardItem {
+  date: string;
+  class_id: string;
+  class_name: string;
+  section_id: string;
+  section_name: string;
+  homework: HomeworkItem[];
+}
+
+export interface HomeworkDashboardResponse {
+  total_classes: number;
+  data: HomeworkDashboardItem[];
+  response_code: number;
+  response_message: string;
+}
+
+export interface SaveHomeworkSubject {
+  subject_id: number;
+  description: string;
+  document: string;
+  image: string;
+}
+
+export interface SaveHomeworkPayload {
+  school_id: string | number;
+  session_id: string | number;
+  class_id: string | number;
+  section_id: string | number;
+  homework_date: string;
+  from_date: string;
+  to_date: string;
+  submit_date: string;
+  subjects: SaveHomeworkSubject[];
+}
+
+export interface SaveHomeworkResponse {
+  response_code: number;
+  response_message: string;
+}

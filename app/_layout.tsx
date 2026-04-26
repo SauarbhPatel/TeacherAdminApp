@@ -54,8 +54,10 @@ function RootNavigator() {
                     <Stack.Screen name="tabs" />
                     <Stack.Screen name="screens/attendance" />
                     <Stack.Screen name="screens/attendance-mark" />
-                    <Stack.Screen name="screens/homework" />
-                    <Stack.Screen name="screens/add-homework" />
+                    <Stack.Screen name="screens/homework-dashboard" />
+                    <Stack.Screen name="screens/homework-entry" />
+                    {/* <Stack.Screen name="screens/homework" />
+                    <Stack.Screen name="screens/add-homework" /> */}
                     <Stack.Screen name="screens/marks" />
                     <Stack.Screen name="screens/marks-entry" />
                     <Stack.Screen name="screens/exam" />

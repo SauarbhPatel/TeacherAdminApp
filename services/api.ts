@@ -163,6 +163,9 @@ import type {
   ExamRemarksResponse,
   SaveExamRemarksPayload,
   SaveExamRemarksResponse,
+  HomeworkDashboardResponse,
+  SaveHomeworkPayload,
+  SaveHomeworkResponse,
 } from '@/types';
 
 /**
@@ -351,3 +354,36 @@ export async function saveExamRemarks(
     body: JSON.stringify(payload),
   });
 }
+
+// ─── ADD TO services/api.ts ──────────────────────────────
+ 
+/**
+ * GET homework dashboard for staff.
+ * POST /webservice/getHomeworkStaff
+ */
+export async function getHomeworkStaff(
+  payload: { school_id: string | number; session_id: string | number },
+  token: string,
+): Promise<HomeworkDashboardResponse> {
+  return apiFetch<HomeworkDashboardResponse>('/webservice/getHomeworkStaff', {
+    method: 'POST',
+    headers: buildHeaders(token,payload?.school_id),
+    body: JSON.stringify(payload),
+  });
+}
+ 
+/**
+ * Save homework for a class/section (all subjects at once).
+ * POST /webservice/saveHomeworkByStaff
+ */
+export async function saveHomeworkByStaff(
+  payload: SaveHomeworkPayload,
+  token: string,
+): Promise<SaveHomeworkResponse> {
+  return apiFetch<SaveHomeworkResponse>('/webservice/saveHomeworkByStaff', {
+    method: 'POST',
+    headers: buildHeaders(token),
+    body: JSON.stringify(payload),
+  });
+}
+ 
