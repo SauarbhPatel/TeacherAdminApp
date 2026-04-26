@@ -43,6 +43,19 @@ const FEATURE_CARDS = [
         style: { bg: "#e7f9f0", color: Colors.green, border: "#a8e8cc" },
         route: "/screens/exam",
     },
+    {
+        icon: "📝",
+        title: "Test Marks Entry",
+        sub: "Class tests & unit test scores",
+
+        style: {
+            bg: "#fef3f2",
+            color: Colors.red,
+            border: "#fcc",
+        },
+
+        route: "/screens/test-marks-entry",
+    },
     // {
     //     icon: "🗓️",
     //     title: "Timetable",

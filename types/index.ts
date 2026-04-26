@@ -464,3 +464,52 @@ export interface SaveHomeworkResponse {
   response_code: number;
   response_message: string;
 }
+
+
+export interface SubjectItem {
+  subject_master_id: string;
+  subject_name: string;
+}
+export interface SubjectListResponse {
+  subjects: SubjectItem[];
+  response_code: number;
+  response_message: string;
+}
+
+export interface TestMarkStudent {
+  student_id: string;
+  admission_no: string;
+  roll_no: string | null;
+  firstname: string;
+  lastname: string | null;
+  father_name: string | null;
+  subject_master_id: string;
+  subject_name: string;
+  entry_id: string | null;
+  marks_obtained: string | null;
+  max_marks: string | null;
+  passing_marks: string | null;
+  weightage: string | null;
+  exam_date: string | null;
+}
+export interface ClassSectionTestResponse {
+  students: TestMarkStudent[];
+  response_code: number;
+  response_message: string;
+}
+
+export interface SaveTestMarksPayload {
+  school_id: string | number;
+  session_id: string | number;
+  class_id: string | number;
+  section_id: string | number;
+  subject_master_id: string | number;
+  student_id: string;
+  marks_obtained: number;
+  max_marks: number;
+  exam_date: string;
+}
+export interface SaveTestMarksResponse {
+  response_code: number;
+  response_message: string;
+}

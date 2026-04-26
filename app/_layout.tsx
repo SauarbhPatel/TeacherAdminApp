@@ -72,6 +72,8 @@ function RootNavigator() {
                     <Stack.Screen name="screens/exam-attendance-students" />
                     <Stack.Screen name="screens/exam-remarks-entry" />
                     <Stack.Screen name="screens/exam-remarks-students" />
+                    <Stack.Screen name="screens/test-marks-entry" />
+                    <Stack.Screen name="screens/test-marks-students" />
                 </>
             )}
         </Stack>

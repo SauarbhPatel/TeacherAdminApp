@@ -166,6 +166,10 @@ import type {
   HomeworkDashboardResponse,
   SaveHomeworkPayload,
   SaveHomeworkResponse,
+  SubjectListResponse,
+  ClassSectionTestResponse,
+  SaveTestMarksPayload,
+  SaveTestMarksResponse,
 } from '@/types';
 
 /**
@@ -387,3 +391,55 @@ export async function saveHomeworkByStaff(
   });
 }
  
+
+
+/**
+ * GET subjects for a class + section.
+ * POST /webservice/getSubjectsByClassSection
+ */
+export async function getSubjectsByClassSection(payload: {
+  school_id: string | number;
+  session_id: string | number;
+  class_id: string | number;
+  section_id: string | number;
+}, token: string): Promise<SubjectListResponse> {
+  return apiFetch<SubjectListResponse>('/webservice/getSubjectsByClassSection', {
+    method: 'POST',
+    headers: buildHeaders(token),
+    body: JSON.stringify(payload),
+  });
+}
+
+/**
+ * GET student list with test marks for class/section/subject/date.
+ * POST /Webservice/getClassSectionTest
+ */
+export async function getClassSectionTest(payload: {
+  school_id: string | number;
+  session_id: string | number;
+  class_id: string | number;
+  section_id: string | number;
+  subject_master_id: string | number;
+  exam_date: string;
+}, token: string): Promise<ClassSectionTestResponse> {
+  return apiFetch<ClassSectionTestResponse>('/Webservice/getClassSectionTest', {
+    method: 'POST',
+    headers: buildHeaders(token,payload?.school_id),
+    body: JSON.stringify(payload),
+  });
+}
+
+/**
+ * Save test marks for one student.
+ * POST /Webservice/saveStudentTestMarks
+ */
+export async function saveStudentTestMarks(
+  payload: SaveTestMarksPayload,
+  token: string,
+): Promise<SaveTestMarksResponse> {
+  return apiFetch<SaveTestMarksResponse>('/Webservice/saveStudentTestMarks', {
+    method: 'POST',
+    headers: buildHeaders(token),
+    body: JSON.stringify(payload),
+  });
+}
