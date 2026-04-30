@@ -1,36 +1,40 @@
 {
   "expo": {
-    "name": "TeachDesk",
-    "slug": "teachdesk",
+    "name": "Edumug Admin",
+    "slug": "sp_edumug",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/logo.png",
-    "scheme": "teachdesk",
+    "icon": "./assets/icon_ed.png",
+    "scheme": "sp_edumug",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/logo.png",
+      "image": "./assets/icon_ed.png",
       "resizeMode": "contain",
       "backgroundColor": "#6722d5"
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.teachdesk.app"
+      "bundleIdentifier": "com.edumug.admin"
+    },
+    "androidNavigationBar": {
+      "visible": "sticky-immersive"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/logo.png",
+        "foregroundImage": "./assets/icon_ed.png",
         "backgroundColor": "#6722d5"
       },
-      "package": "com.teachdesk.app"
+      "package": "com.edumug.admin"
     },
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/logo.png"
+      "favicon": "./assets/icon_ed.png"
     },
     "plugins": [
       "expo-router",
-      "expo-font"
+      "expo-font",
+      "@react-native-community/datetimepicker"
     ],
     "experiments": {
       "typedRoutes": true
@@ -38,7 +42,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "a5c0ad97-8662-46af-84b2-bc5ba973f603"
+        "projectId": "2bb63d21-48b4-4eca-a194-aa567cccb3b6"
       }
     }
   }

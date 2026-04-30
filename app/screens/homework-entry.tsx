@@ -24,12 +24,19 @@ import {
     KeyboardAvoidingView,
     Platform,
 } from "react-native";
+import DateTimePicker, {
+    DateTimePickerEvent,
+} from "@react-native-community/datetimepicker";
 import { LinearGradient } from "expo-linear-gradient";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+    SafeAreaView,
+    useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
 import { useAuth } from "@/context/AuthContext";
 import { saveHomeworkByStaff } from "@/services/api";
 import { Colors, Spacing, Radius, Shadow } from "@/constants/theme";
+import { StatusBar } from "expo-status-bar";
 
 // ─── Types ────────────────────────────────────────────────
 interface HomeworkItem {
@@ -110,7 +117,7 @@ const toastS = StyleSheet.create({
     txt: { color: "#fff", fontWeight: "800", fontSize: 13 },
 });
 
-// ─── Date Picker Field (text input styled as date) ────────
+// ─── Date Picker Field ────────────────────────────────────
 function DateField({
     label,
     value,
@@ -118,32 +125,68 @@ function DateField({
     required,
 }: {
     label: string;
-    value: string;
+    value: string; // YYYY-MM-DD
     onChange: (v: string) => void;
     required?: boolean;
 }) {
-    // Simple YYYY-MM-DD text input — date picker native not available without extra lib
+    const [show, setShow] = useState(false);
+    // Parse ISO → Date for the picker
+    const dateObj = value ? new Date(value + "T00:00:00") : new Date();
+
+    const onPickerChange = (_: DateTimePickerEvent, selected?: Date) => {
+        if (Platform.OS === "android") setShow(false);
+        // if (selected) {
+        //     const iso = selected.toISOString().split("T")[0];
+        //     onChange(iso);
+        // }
+
+        if (selected) {
+            const year = selected.getFullYear();
+            const month = String(selected.getMonth() + 1).padStart(2, "0");
+            const day = String(selected.getDate()).padStart(2, "0");
+
+            const iso = `${year}-${month}-${day}`;
+            onChange(iso);
+        }
+    };
+
     return (
         <View style={df.wrap}>
             <Text style={df.label}>
                 {label}
                 {required ? " *" : ""}
             </Text>
-            <View style={df.inputRow}>
+            <TouchableOpacity
+                style={df.inputRow}
+                onPress={() => setShow(true)}
+                activeOpacity={0.8}
+            >
                 <Text style={{ fontSize: 16 }}>📅</Text>
-                <TextInput
-                    style={df.input}
-                    value={value}
-                    onChangeText={onChange}
-                    placeholder="YYYY-MM-DD"
-                    placeholderTextColor={Colors.text3}
-                    keyboardType="numeric"
-                    maxLength={10}
+                <Text style={[df.dateText, !value && { color: Colors.text3 }]}>
+                    {value ? formatDisplay(value) : "Pick a date"}
+                </Text>
+                <Text style={df.chevron}>›</Text>
+            </TouchableOpacity>
+
+            {/* iOS shows inline; Android shows modal */}
+            {show && (
+                <DateTimePicker
+                    value={dateObj}
+                    mode="date"
+                    display={Platform.OS === "ios" ? "spinner" : "default"}
+                    onChange={onPickerChange}
+                    onTouchCancel={() => setShow(false)}
                 />
-                {/* {value ? (
-                    <Text style={df.display}>{formatDisplay(value)}</Text>
-                ) : null} */}
-            </View>
+            )}
+            {/* iOS: done button to dismiss */}
+            {show && Platform.OS === "ios" && (
+                <TouchableOpacity
+                    style={df.doneBtn}
+                    onPress={() => setShow(false)}
+                >
+                    <Text style={df.doneTxt}>Done</Text>
+                </TouchableOpacity>
+            )}
         </View>
     );
 }
@@ -160,16 +203,25 @@ const df = StyleSheet.create({
     inputRow: {
         flexDirection: "row",
         alignItems: "center",
-        gap: 8,
+        gap: 10,
         backgroundColor: Colors.surface,
         borderRadius: Radius.md,
         borderWidth: 1.5,
         borderColor: Colors.border,
         paddingHorizontal: 12,
-        paddingVertical: 10,
+        paddingVertical: 12,
     },
-    input: { flex: 1, fontSize: 14, color: Colors.text1, fontWeight: "600" },
-    display: { fontSize: 12, fontWeight: "700", color: Colors.green },
+    dateText: { flex: 1, fontSize: 14, fontWeight: "700", color: Colors.text1 },
+    chevron: { fontSize: 18, color: Colors.text3 },
+    doneBtn: {
+        alignSelf: "flex-end",
+        marginTop: 6,
+        backgroundColor: Colors.green,
+        borderRadius: 8,
+        paddingHorizontal: 20,
+        paddingVertical: 6,
+    },
+    doneTxt: { color: "#fff", fontWeight: "800", fontSize: 13 },
 });
 
 // ─── Static Upload Button ─────────────────────────────────
@@ -446,11 +498,35 @@ export default function HomeworkEntryScreen() {
     );
 
     // ── Shared date state ────────────────────────────────────
+    // fromDate always mirrors hwDate (no separate UI)
+    // toDate + submitDate revealed by "More dates" toggle
     const today = todayISO();
     const [hwDate, setHwDate] = useState(today);
-    const [fromDate, setFromDate] = useState(today);
     const [toDate, setToDate] = useState(today);
     const [submitDate, setSubmitDate] = useState(addDays(today, 1));
+    const fromDate = hwDate; // always same as homework date
+    const [showMoreDates, setShowMoreDates] = useState(false);
+
+    // When hwDate changes → sync toDate + submitDate only if user hasn't manually changed them
+    const toDateTouched = useRef(false);
+    const submitDateTouched = useRef(false);
+
+    const handleHwDateChange = useCallback((v: string) => {
+        setHwDate(v);
+        if (!toDateTouched.current) setToDate(v);
+        if (!submitDateTouched.current) setSubmitDate(addDays(v, 1));
+    }, []);
+
+    const handleToDateChange = useCallback((v: string) => {
+        toDateTouched.current = true;
+        setToDate(v);
+    }, []);
+
+    const handleSubmitDateChange = useCallback((v: string) => {
+        submitDateTouched.current = true;
+        console.log(v);
+        setSubmitDate(v);
+    }, []);
 
     // ── Per-subject state (initialised from existing homework) ─
     const [subjects, setSubjects] = useState<LocalSubject[]>(() =>
@@ -488,7 +564,6 @@ export default function HomeworkEntryScreen() {
     // ── Validate ─────────────────────────────────────────────
     const validate = (): string | null => {
         if (!hwDate) return "Homework date is required.";
-        if (!fromDate) return "From date is required.";
         if (!toDate) return "To date is required.";
         if (!submitDate) return "Submission date is required.";
         return null;
@@ -497,6 +572,7 @@ export default function HomeworkEntryScreen() {
     // ── Save for one section ─────────────────────────────────
     const saveForSection = async (sec_id: string): Promise<boolean> => {
         if (!user?.token || !user.record) return false;
+
         const res = await saveHomeworkByStaff(
             {
                 school_id: user.record.school_id,
@@ -579,13 +655,12 @@ export default function HomeworkEntryScreen() {
     );
 
     const filledCount = subjects.filter((s) => s.description.trim()).length;
-
     return (
-        <KeyboardAvoidingView
-            style={{ flex: 1 }}
-            behavior={Platform.OS === "ios" ? "padding" : undefined}
-        >
-            <View style={{ flex: 1, backgroundColor: Colors.surface }}>
+        <View style={{ flex: 1, backgroundColor: Colors.surface }}>
+            <KeyboardAvoidingView
+                style={{ flex: 1 }}
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
+            >
                 {/* Header */}
                 <LinearGradient
                     colors={[Colors.green, "#0a8a50"]}
@@ -642,48 +717,98 @@ export default function HomeworkEntryScreen() {
                     keyboardShouldPersistTaps="handled"
                     contentContainerStyle={{
                         padding: Spacing.lg,
-                        paddingBottom: 120,
+                        paddingBottom: 80,
                     }}
+                    style={{ flex: 1 }}
                 >
                     {/* ── Date fields ── */}
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>📅 Dates</Text>
-                        <View style={styles.dateGrid}>
-                            <View style={{ flex: 1 }}>
-                                <DateField
-                                    label="Homework Date"
-                                    value={hwDate}
-                                    onChange={setHwDate}
-                                    required
-                                />
-                            </View>
-                            <View style={{ flex: 1 }}>
-                                <DateField
-                                    label="Submit Date"
-                                    value={submitDate}
-                                    onChange={setSubmitDate}
-                                    required
-                                />
-                            </View>
-                        </View>
-                        <View style={styles.dateGrid}>
+
+                        {/* Homework Date + toggle button on same row */}
+                        <View style={styles.hwDateRow}>
                             <View style={{ flex: 1 }}>
                                 <DateField
                                     label="From Date"
-                                    value={fromDate}
-                                    onChange={setFromDate}
+                                    value={hwDate}
+                                    onChange={handleHwDateChange}
                                     required
                                 />
                             </View>
-                            <View style={{ flex: 1 }}>
-                                <DateField
-                                    label="To Date"
-                                    value={toDate}
-                                    onChange={setToDate}
-                                    required
-                                />
-                            </View>
+                            <TouchableOpacity
+                                style={[
+                                    styles.toggleBtn,
+                                    showMoreDates && styles.toggleBtnActive,
+                                ]}
+                                onPress={() => setShowMoreDates((p) => !p)}
+                                activeOpacity={0.8}
+                            >
+                                <Text
+                                    style={[
+                                        styles.toggleBtnIcon,
+                                        showMoreDates && {
+                                            color: Colors.green,
+                                        },
+                                    ]}
+                                >
+                                    {showMoreDates ? "▲" : "▼"}
+                                </Text>
+                                <Text
+                                    style={[
+                                        styles.toggleBtnTxt,
+                                        showMoreDates && {
+                                            color: Colors.green,
+                                        },
+                                    ]}
+                                >
+                                    {showMoreDates ? "Less" : "More\nDates"}
+                                </Text>
+                            </TouchableOpacity>
                         </View>
+
+                        {/* Collapsible: Submit Date + To Date */}
+                        {showMoreDates && (
+                            <View style={styles.dateGrid}>
+                                <View style={{ flex: 1 }}>
+                                    <DateField
+                                        label="To Date"
+                                        value={toDate}
+                                        onChange={handleToDateChange}
+                                        required
+                                    />
+                                </View>
+                                <View style={{ flex: 1 }}>
+                                    <DateField
+                                        label="Submit Date"
+                                        value={submitDate}
+                                        onChange={handleSubmitDateChange}
+                                        required
+                                    />
+                                </View>
+                            </View>
+                        )}
+
+                        {/* Summary chips when collapsed */}
+                        {/* {!showMoreDates && (
+                            <View style={styles.dateSummaryRow}>
+                                <View style={styles.dateSummaryChip}>
+                                    <Text style={styles.dateSummaryLbl}>
+                                        To
+                                    </Text>
+                                    <Text style={styles.dateSummaryVal}>
+                                        {formatDisplay(toDate)}
+                                    </Text>
+                                </View>
+                                <View style={styles.dateSummaryChip}>
+                                    <Text style={styles.dateSummaryLbl}>
+                                        Submit
+                                    </Text>
+                                    <Text style={styles.dateSummaryVal}>
+                                        {formatDisplay(submitDate)}
+                                    </Text>
+                                </View>
+                            </View>
+                        )} */}
                     </View>
 
                     {/* ── Per-subject cards ── */}
@@ -693,7 +818,12 @@ export default function HomeworkEntryScreen() {
                             <Text style={{ fontSize: 36, marginBottom: 10 }}>
                                 📭
                             </Text>
-                            <Text style={{ color: Colors.text3, fontSize: 14 }}>
+                            <Text
+                                style={{
+                                    color: Colors.text3,
+                                    fontSize: 14,
+                                }}
+                            >
                                 No subjects assigned to this section
                             </Text>
                         </View>
@@ -737,20 +867,6 @@ export default function HomeworkEntryScreen() {
                                         <Text style={styles.subjectName}>
                                             {subject.subject_name}
                                         </Text>
-                                        <Text
-                                            style={[
-                                                styles.subjectStatus,
-                                                {
-                                                    color: filled
-                                                        ? Colors.green
-                                                        : Colors.text3,
-                                                },
-                                            ]}
-                                        >
-                                            {filled
-                                                ? "✓ Description added"
-                                                : "No description yet"}
-                                        </Text>
                                     </View>
                                     {filled && (
                                         <View style={styles.filledBadge}>
@@ -762,9 +878,9 @@ export default function HomeworkEntryScreen() {
                                 </View>
 
                                 {/* Description */}
-                                <Text style={styles.fieldLabel}>
+                                {/* <Text style={styles.fieldLabel}>
                                     Description
-                                </Text>
+                                </Text> */}
                                 <TextInput
                                     style={[
                                         styles.descInput,
@@ -782,7 +898,7 @@ export default function HomeworkEntryScreen() {
                                 />
 
                                 {/* Upload buttons (static UI) */}
-                                <Text
+                                {/* <Text
                                     style={[
                                         styles.fieldLabel,
                                         { marginTop: 10 },
@@ -811,75 +927,67 @@ export default function HomeworkEntryScreen() {
                                             )
                                         }
                                     />
-                                </View>
+                                </View> */}
                             </View>
                         );
                     })}
                 </ScrollView>
+            </KeyboardAvoidingView>
+            {/* Bottom action strip */}
+            <View style={styles.footer}>
+                {/* Copy to section button */}
+                <TouchableOpacity
+                    style={styles.copyBtn}
+                    onPress={() => setShowCopy(true)}
+                    activeOpacity={0.8}
+                    disabled={saving}
+                >
+                    <Text style={{ fontSize: 16 }}>📋</Text>
+                    <Text style={styles.copyBtnTxt}>Copy to Section</Text>
+                </TouchableOpacity>
 
-                {/* Bottom action strip */}
-                <View style={styles.footer}>
-                    {/* Copy to section button */}
-                    <TouchableOpacity
-                        style={styles.copyBtn}
-                        onPress={() => setShowCopy(true)}
-                        activeOpacity={0.8}
-                        disabled={saving}
+                {/* Save button */}
+                <TouchableOpacity
+                    style={[styles.saveBtn, saving && { opacity: 0.7 }]}
+                    onPress={handleSave}
+                    disabled={saving}
+                    activeOpacity={0.85}
+                >
+                    <LinearGradient
+                        colors={[Colors.green, "#0a8a50"]}
+                        style={styles.saveBtnGrad}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 0 }}
                     >
-                        <Text style={{ fontSize: 16 }}>📋</Text>
-                        <Text style={styles.copyBtnTxt}>Copy to Section</Text>
-                    </TouchableOpacity>
-
-                    {/* Save button */}
-                    <TouchableOpacity
-                        style={[styles.saveBtn, saving && { opacity: 0.7 }]}
-                        onPress={handleSave}
-                        disabled={saving}
-                        activeOpacity={0.85}
-                    >
-                        <LinearGradient
-                            colors={[Colors.green, "#0a8a50"]}
-                            style={styles.saveBtnGrad}
-                            start={{ x: 0, y: 0 }}
-                            end={{ x: 1, y: 0 }}
-                        >
-                            {saving ? (
-                                <View
-                                    style={{
-                                        flexDirection: "row",
-                                        alignItems: "center",
-                                        gap: 8,
-                                    }}
-                                >
-                                    <ActivityIndicator
-                                        size="small"
-                                        color="#fff"
-                                    />
-                                    <Text style={styles.saveBtnTxt}>
-                                        Saving…
-                                    </Text>
-                                </View>
-                            ) : (
-                                <Text style={styles.saveBtnTxt}>
-                                    Save Homework
-                                </Text>
-                            )}
-                        </LinearGradient>
-                    </TouchableOpacity>
-                </View>
-
-                {/* Copy modal */}
-                <CopyModal
-                    visible={showCopy}
-                    sections={allSections}
-                    currentSectionId={section_id}
-                    onClose={() => setShowCopy(false)}
-                    onConfirm={handleCopy}
-                />
-
-                <SaveToast visible={showToast} />
+                        {saving ? (
+                            <View
+                                style={{
+                                    flexDirection: "row",
+                                    alignItems: "center",
+                                    gap: 8,
+                                }}
+                            >
+                                <ActivityIndicator size="small" color="#fff" />
+                                <Text style={styles.saveBtnTxt}>Saving…</Text>
+                            </View>
+                        ) : (
+                            <Text style={styles.saveBtnTxt}>Save Homework</Text>
+                        )}
+                    </LinearGradient>
+                </TouchableOpacity>
             </View>
-        </KeyboardAvoidingView>
+
+            {/* Copy modal */}
+            <CopyModal
+                visible={showCopy}
+                sections={allSections}
+                currentSectionId={section_id}
+                onClose={() => setShowCopy(false)}
+                onConfirm={handleCopy}
+            />
+
+            <SaveToast visible={showToast} />
+        </View>
     );
 }
 
@@ -950,6 +1058,58 @@ const styles = StyleSheet.create({
         letterSpacing: 0.3,
     },
     dateGrid: { flexDirection: "row", gap: 10 },
+    hwDateRow: {
+        flexDirection: "row",
+        alignItems: "flex-end",
+        gap: 10,
+        marginBottom: 0,
+    },
+    toggleBtn: {
+        width: 52,
+        height: 52,
+        borderRadius: Radius.md,
+        backgroundColor: Colors.surface,
+        borderWidth: 1.5,
+        borderColor: Colors.border,
+        alignItems: "center",
+        justifyContent: "center",
+        marginBottom: 12,
+        gap: 2,
+    },
+    toggleBtnActive: {
+        backgroundColor: Colors.greenBg,
+        borderColor: Colors.green + "60",
+    },
+    toggleBtnIcon: { fontSize: 10, fontWeight: "900", color: Colors.text3 },
+    toggleBtnTxt: {
+        fontSize: 8,
+        fontWeight: "700",
+        color: Colors.text3,
+        textAlign: "center",
+        lineHeight: 11,
+    },
+    dateSummaryRow: { flexDirection: "row", gap: 8, marginBottom: 12 },
+    dateSummaryChip: {
+        flex: 1,
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 6,
+        backgroundColor: Colors.greenBg,
+        borderRadius: 8,
+        paddingHorizontal: 10,
+        paddingVertical: 6,
+    },
+    dateSummaryLbl: {
+        fontSize: 9,
+        fontWeight: "700",
+        color: Colors.text3,
+        textTransform: "uppercase",
+    },
+    dateSummaryVal: {
+        fontSize: 11,
+        fontWeight: "800",
+        color: Colors.greenText,
+    },
     emptyWrap: { alignItems: "center", paddingTop: 40 },
     // Subject cards
     subjectCard: {

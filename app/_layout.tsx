@@ -4,7 +4,10 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as SplashScreen from "expo-splash-screen";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import {
+    SafeAreaProvider,
+    useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { AppProvider } from "@/context/AppContext";
@@ -82,8 +85,15 @@ function RootNavigator() {
 
 // ─── Root (wraps in all providers) ──────────────────────
 export default function RootLayout() {
+    const insets = useSafeAreaInsets();
+    console.log(insets.bottom);
     return (
-        <GestureHandlerRootView style={{ flex: 1 }}>
+        <GestureHandlerRootView
+            style={{
+                flex: 1,
+                paddingBottom: insets.bottom > 0 ? insets.bottom : 0,
+            }}
+        >
             <SafeAreaProvider>
                 <StatusBar style="dark" />
                 <AuthProvider>
