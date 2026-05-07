@@ -269,14 +269,14 @@ export default function LoginScreen() {
                         </TouchableOpacity>
 
                         {/* Divider */}
-                        <View style={styles.divider}>
+                        {/* <View style={styles.divider}>
                             <View style={styles.dividerLine} />
                             <Text style={styles.dividerText}>test account</Text>
                             <View style={styles.dividerLine} />
-                        </View>
+                        </View> */}
 
                         {/* Demo Card */}
-                        <TouchableOpacity
+                        {/* <TouchableOpacity
                             style={styles.demoCard}
                             onPress={() => {
                                 setUsername(DEMO_USERNAME);
@@ -303,7 +303,7 @@ export default function LoginScreen() {
                             <Text style={styles.demoHint}>
                                 Tap to autofill →
                             </Text>
-                        </TouchableOpacity>
+                        </TouchableOpacity> */}
                     </Animated.View>
 
                     <Text style={styles.footer}>© 2026 Edumug Admin</Text>

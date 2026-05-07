@@ -17,6 +17,7 @@ import {
     StyleSheet,
     ActivityIndicator,
     RefreshControl,
+    BackHandler,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -261,6 +262,18 @@ export default function HomeworkDashboardScreen() {
             },
         });
     };
+
+    useEffect(() => {
+        const backAction = () => {
+            !router.canGoBack() ? router.replace("tabs") : router.back();
+            return true;
+        };
+        const subscription = BackHandler.addEventListener(
+            "hardwareBackPress",
+            backAction,
+        );
+        return () => subscription.remove();
+    }, []);
 
     return (
         <View style={{ flex: 1, backgroundColor: Colors.surface }}>

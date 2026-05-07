@@ -86,7 +86,6 @@ function RootNavigator() {
 // ─── Root (wraps in all providers) ──────────────────────
 export default function RootLayout() {
     const insets = useSafeAreaInsets();
-    console.log(insets.bottom);
     return (
         <GestureHandlerRootView
             style={{

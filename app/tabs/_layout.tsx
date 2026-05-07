@@ -56,7 +56,7 @@ export default function TabsLayout() {
                     ),
                 }}
             />
-            <Tabs.Screen
+            {/* <Tabs.Screen
                 name="schedule"
                 options={{
                     tabBarIcon: ({ focused }) => (
@@ -67,7 +67,7 @@ export default function TabsLayout() {
                         />
                     ),
                 }}
-            />
+            /> */}
             <Tabs.Screen
                 name="profile"
                 options={{

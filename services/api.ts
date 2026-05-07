@@ -175,6 +175,7 @@ import type {
 /**
  * GET list of all classes with their sections.
  * GET /webservice/getClassSectionList
+ * NEW_API /webservice/getClassSectionList?school_id=131&session_id=22&type=(homework/subjects/all) updated api but not used 
  */
 export async function getClassSectionList(
   token: string,
