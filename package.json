@@ -6,7 +6,9 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "ipad": "xcrun simctl boot \"iPad Pro 13-inch (M5)\" && expo start --ios",
+    "iphone": "xcrun simctl boot \"iPhone 17\" && expo start --ios"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
@@ -34,6 +36,7 @@
   "devDependencies": {
     "@babel/core": "^7.25.2",
     "@types/react": "~19.1.10",
+    "concurrently": "^9.2.1",
     "typescript": "^5.3.3"
   }
 }
