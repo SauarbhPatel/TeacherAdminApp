@@ -6,7 +6,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon_ed.png",
-    "scheme": "sp_edumug",
+    "scheme": "edumugadmin",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/icon_ed.png",
@@ -15,7 +15,10 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.edumug.admin"
+      "bundleIdentifier": "com.edumug.admin",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "androidNavigationBar": {
       "visible": "sticky-immersive"
