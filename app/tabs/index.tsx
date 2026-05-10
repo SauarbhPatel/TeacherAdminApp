@@ -208,29 +208,7 @@ export default function HomeScreen() {
                             <Text style={[styles.statSub, { color: Colors.purple + 'aa' }]}>{stats.totalStudents} students</Text>
                         </View>
 
-                        {/* Card 2: Present */}
-                        <View style={[styles.statCard, { backgroundColor: Colors.greenBg, borderColor: '#a8e8cc' }]}>
-                            <Text style={[styles.statNum, { color: Colors.green }]}>{stats.totalPresent}</Text>
-                            <Text style={[styles.statLabel, { color: Colors.greenText }]}>Present</Text>
-                            <Text style={[styles.statSub, { color: Colors.green + 'aa' }]}>
-                                {stats.totalStudents > 0
-                                    ? `${Math.round((stats.totalPresent / stats.totalStudents) * 100)}%`
-                                    : '—'}
-                            </Text>
-                        </View>
-
-                        {/* Card 3: Absent */}
-                        <View style={[styles.statCard, { backgroundColor: Colors.redBg, borderColor: '#fca5a5' }]}>
-                            <Text style={[styles.statNum, { color: Colors.red }]}>{stats.totalAbsent}</Text>
-                            <Text style={[styles.statLabel, { color: Colors.redText }]}>Absent</Text>
-                            <Text style={[styles.statSub, { color: Colors.red + 'aa' }]}>
-                                {stats.totalStudents > 0
-                                    ? `${Math.round((stats.totalAbsent / stats.totalStudents) * 100)}%`
-                                    : '—'}
-                            </Text>
-                        </View>
-
-                        {/* Card 4: Pending — CLICKABLE */}
+                          {/* Card 4: Pending — CLICKABLE */}
                         <TouchableOpacity
                             style={[
                                 styles.statCard,
@@ -257,6 +235,30 @@ export default function HomeScreen() {
                                 {stats.pendingClasses > 0 ? 'Tap to mark →' : 'All done!'}
                             </Text>
                         </TouchableOpacity>
+
+                        {/* Card 2: Present */}
+                        <View style={[styles.statCard, { backgroundColor: Colors.greenBg, borderColor: '#a8e8cc' }]}>
+                            <Text style={[styles.statNum, { color: Colors.green }]}>{stats.totalPresent}</Text>
+                            <Text style={[styles.statLabel, { color: Colors.greenText }]}>Present</Text>
+                            <Text style={[styles.statSub, { color: Colors.green + 'aa' }]}>
+                                {stats.totalStudents > 0
+                                    ? `${Math.round((stats.totalPresent / stats.totalStudents) * 100)}%`
+                                    : '—'}
+                            </Text>
+                        </View>
+
+                        {/* Card 3: Absent */}
+                        <View style={[styles.statCard, { backgroundColor: Colors.redBg, borderColor: '#fca5a5' }]}>
+                            <Text style={[styles.statNum, { color: Colors.red }]}>{stats.totalAbsent}</Text>
+                            <Text style={[styles.statLabel, { color: Colors.redText }]}>Absent</Text>
+                            <Text style={[styles.statSub, { color: Colors.red + 'aa' }]}>
+                                {stats.totalStudents > 0
+                                    ? `${Math.round((stats.totalAbsent / stats.totalStudents) * 100)}%`
+                                    : '—'}
+                            </Text>
+                        </View>
+
+                      
                     </View>
                 )}
 
