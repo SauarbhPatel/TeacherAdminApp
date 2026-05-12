@@ -250,10 +250,12 @@ export default function MarksEntryScreen() {
         setClsLoading(true);
         setClsError("");
         try {
-            const res = await getClassSectionList(
-                user.token,
-                user.record.school_id,
-            );
+          const res = await getClassSectionList(
+                 user.token,
+                 user.record.school_id,
+                 (user.record as any).session_id ?? null,
+                 "subjects",
+               );
 
             console.log(res);
             if (res.response_code === 200) {

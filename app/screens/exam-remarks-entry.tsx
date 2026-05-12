@@ -240,10 +240,12 @@ export default function ExamRemarksEntryScreen() {
         setClsLoading(true);
         setClsError("");
         try {
-            const res = await getClassSectionList(
-                user.token,
-                user.record.school_id,
-            );
+           const res = await getClassSectionList(
+                  user.token,
+                  user.record.school_id,
+                  (user.record as any).session_id ?? null,
+                  "subjects",
+                );
             if (res.response_code === 200) setClasses(res.data ?? []);
             else setClsError(res.response_message || "Could not load classes.");
         } catch (e: any) {

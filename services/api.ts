@@ -179,9 +179,11 @@ import type {
  */
 export async function getClassSectionList(
   token: string,
-  school_id: string
+  school_id: string,
+  session_id: string,
+  type:string|null
 ): Promise<ClassSectionListResponse> {
-  return apiFetch<ClassSectionListResponse>('/webservice/getClassSectionList', {
+  return apiFetch<ClassSectionListResponse>(`/webservice/getClassSectionList?school_id=${school_id}&session_id=${session_id}&type=${type||"all"}`, {
     method: 'GET',
     headers: buildHeaders(token,school_id),
   });
