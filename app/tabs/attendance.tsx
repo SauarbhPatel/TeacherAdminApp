@@ -1,10 +1,5 @@
-import { useEffect } from 'react';
-import { router } from 'expo-router';
+import AttendanceScreen from "../screens/attendance";
 
-// This tab redirects to the attendance screen
 export default function AttendanceTab() {
-  useEffect(() => {
-    router.replace('/screens/attendance');
-  }, []);
-  return null;
+    return <AttendanceScreen />;
 }

@@ -1,9 +1,5 @@
-import { useEffect } from "react";
-import { router } from "expo-router";
+import HomeworkDashboardScreen from "../screens/homework-dashboard";
 
 export default function HomeworkTab() {
-    useEffect(() => {
-        router.replace("/screens/homework-dashboard");
-    }, []);
-    return null;
+    return <HomeworkDashboardScreen />;
 }

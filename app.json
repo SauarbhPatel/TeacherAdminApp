@@ -28,7 +28,7 @@
         "foregroundImage": "./assets/icon_ed.png",
         "backgroundColor": "#6722d5"
       },
-      "package": "com.edumug.admin"
+      "package": "admin.edumug.com"
     },
     "web": {
       "bundler": "metro",
