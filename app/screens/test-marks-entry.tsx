@@ -295,10 +295,12 @@ export default function TestMarksEntryScreen() {
                     },
                     user.token,
                 );
+
+                console.log("getSubjectsByClassSection",res);
                 if (res.response_code === 200) setSubjects(res.subjects ?? []);
                 else
                     setSubError(
-                        res.response_message || "Could not load subjects.",
+                        res.message || "Could not load subjects.",
                     );
             } catch (e: any) {
                 setSubError(e?.message || "Network error.");

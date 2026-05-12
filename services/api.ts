@@ -180,7 +180,6 @@ import type {
 export async function getClassSectionList(
   token: string,
   school_id: string
-
 ): Promise<ClassSectionListResponse> {
   return apiFetch<ClassSectionListResponse>('/webservice/getClassSectionList', {
     method: 'GET',
@@ -397,16 +396,18 @@ export async function saveHomeworkByStaff(
 /**
  * GET subjects for a class + section.
  * POST /webservice/getSubjectsByClassSection
+ * NEW_API /webservice/getTestSubjectsByClassSection
  */
+
 export async function getSubjectsByClassSection(payload: {
   school_id: string | number;
   session_id: string | number;
   class_id: string | number;
   section_id: string | number;
 }, token: string): Promise<SubjectListResponse> {
-  return apiFetch<SubjectListResponse>('/webservice/getSubjectsByClassSection', {
+  return apiFetch<SubjectListResponse>('/webservice/getTestSubjectsByClassSection', {
     method: 'POST',
-    headers: buildHeaders(token),
+    headers: buildHeaders(token,payload?.school_id),
     body: JSON.stringify(payload),
   });
 }

@@ -472,6 +472,7 @@ export interface SubjectItem {
 }
 export interface SubjectListResponse {
   subjects: SubjectItem[];
+  message: string;
   response_code: number;
   response_message: string;
 }
