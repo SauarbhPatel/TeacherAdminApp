@@ -17,6 +17,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { Colors, Spacing, Radius, Shadow } from "@/constants/theme";
+import { BottomNav } from "@/components/ui/BottomNav";
 
 // ─── Card definitions ─────────────────────────────────────
 const EXAM_FEATURES = [
@@ -192,6 +193,8 @@ export default function ExamScreen() {
                     </TouchableOpacity>
                 ))}
             </ScrollView>
+                  <BottomNav />
+            
         </View>
     );
 }

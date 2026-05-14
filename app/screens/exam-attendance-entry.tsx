@@ -24,6 +24,7 @@ import { useAuth } from "@/context/AuthContext";
 import { getClassSectionList, getClassExamList } from "@/services/api";
 import { ClassWithSections, ClassSection, ExamItem } from "@/types";
 import { Colors, Spacing, Radius, Shadow } from "@/constants/theme";
+import { BottomNav } from "@/components/ui/BottomNav";
 
 type Step = 1 | 2 | 3;
 
@@ -651,6 +652,8 @@ export default function ExamAttendanceEntryScreen() {
                     </>
                 )}
             </ScrollView>
+                  <BottomNav />
+            
         </View>
     );
 }

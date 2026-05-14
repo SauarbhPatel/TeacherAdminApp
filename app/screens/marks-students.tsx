@@ -38,6 +38,7 @@ import {
 } from "@/services/api";
 import { MarksStudent, MarksSubject } from "@/types";
 import { Colors, Spacing, Radius, Shadow } from "@/constants/theme";
+import { BottomNav } from "@/components/ui/BottomNav";
 
 // ─── Grade colour map ────────────────────────────────────
 const GRADE_COLOR: Record<string, { bg: string; text: string }> = {
@@ -727,6 +728,8 @@ function SubjectWiseTab({ students, params, user, onToast }: SubjectWiseProps) {
                     })
                 )}
             </ScrollView>
+
+            
         </View>
     );
 }
@@ -1392,6 +1395,8 @@ export default function MarksStudentsScreen() {
 
             {/* Toast */}
             <SaveToast visible={showToast} />
+                  <BottomNav />
+
         </View>
     );
 }

@@ -24,6 +24,7 @@ import { useAuth } from "@/context/AuthContext";
 import { getClassSectionList, getCoscholasticExamList } from "@/services/api";
 import { ClassWithSections, ClassSection, CoscholasticExamItem } from "@/types";
 import { Colors, Spacing, Radius, Shadow } from "@/constants/theme";
+import { BottomNav } from "@/components/ui/BottomNav";
 
 type Step = 1 | 2 | 3;
 
@@ -610,6 +611,8 @@ export default function CoscholasticEntryScreen() {
           </>
         )}
       </ScrollView>
+            <BottomNav />
+      
     </View>
   );
 }
