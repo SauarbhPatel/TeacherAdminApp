@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { View, ActivityIndicator } from "react-native";
+import { View, ActivityIndicator, Platform } from "react-native";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as SplashScreen from "expo-splash-screen";
@@ -55,6 +55,7 @@ function RootNavigator() {
             ) : (
                 <>
                     <Stack.Screen name="tabs" />
+                     <Stack.Screen name="screens/profile" />
                     <Stack.Screen name="screens/attendance" />
                     <Stack.Screen name="screens/attendance-mark" />
                     <Stack.Screen name="screens/homework-dashboard" />
@@ -90,7 +91,8 @@ export default function RootLayout() {
         <GestureHandlerRootView
             style={{
                 flex: 1,
-                paddingBottom: insets.bottom > 0 ? insets.bottom : 0,
+                paddingBottom: insets.bottom > 0 ? Platform.OS=="android"? insets.bottom:20 : 0,
+                backgroundColor:"#fff"
             }}
         >
             <SafeAreaProvider>

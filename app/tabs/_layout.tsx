@@ -56,26 +56,31 @@ export default function TabsLayout() {
                     ),
                 }}
             />
-            {/* <Tabs.Screen
-                name="schedule"
+            <Tabs.Screen
+                name="exam"
                 options={{
                     tabBarIcon: ({ focused }) => (
                         <TabIcon
-                            emoji="🗓️"
-                            label="Schedule"
+                            emoji="📊"
+                            label="Exam"
                             focused={focused}
                         />
                     ),
                 }}
-            /> */}
+            />
             <Tabs.Screen
-                name="profile"
+                name="test"
                 options={{
                     tabBarIcon: ({ focused }) => (
-                        <TabIcon emoji="👤" label="Profile" focused={focused} />
+                        <TabIcon
+                            emoji="📝"
+                            label="Test"
+                            focused={focused}
+                        />
                     ),
                 }}
             />
+           
         </Tabs>
     );
 }

@@ -19,14 +19,14 @@ const TABS = [
   { key: 'home',       emoji: '🏠',  label: 'Home',       route: '/tabs'             },
   { key: 'attendance', emoji: '✅',  label: 'Attendance',  route: '/screens/attendance'     },
   { key: 'homework',   emoji: '📚',  label: 'Homework',    route: '/screens/homework-dashboard' },
-//   { key: 'exam',       emoji: '📊',  label: 'Exam',        route: '/screens/exam'           },
-  { key: 'profile',    emoji: '👤',  label: 'Profile',     route: '/tabs/profile'           },
+ { key: 'exam',       emoji: '📊', label: 'Exam',        route: '/tabs/exam'        },
+    { key: 'test',       emoji: '📝', label: 'Test',        route: '/tabs/test'        },
 ] as const;
 
 // ─── Which path belongs to which tab key ─────────────────
 function resolveActiveTab(pathname: string): string {
   if (pathname === '/' || pathname.includes('/tabs/index') || pathname === '/tabs') return 'home';
-  if (pathname.includes('/tabs/profile')) return 'profile';
+  // if (pathname.includes('/tabs/profile')) return 'profile';
   if (
     pathname.includes('/screens/attendance')
   ) return 'attendance';
@@ -40,6 +40,9 @@ function resolveActiveTab(pathname: string): string {
     pathname.includes('/screens/coscholastic') ||
     pathname.includes('/screens/test-marks')
   ) return 'exam';
+   if (
+        pathname.includes('/screens/test-marks')
+    ) return 'test';
   return 'home';
 }
 

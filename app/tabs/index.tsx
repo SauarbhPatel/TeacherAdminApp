@@ -149,7 +149,7 @@ export default function HomeScreen() {
                     </View>
                     <TouchableOpacity
                         style={styles.avatarBtn}
-                        onPress={() => router.push("/tabs/profile" as any)}
+                        onPress={() => router.push("/screens/profile" as any)}
                         activeOpacity={0.8}
                     >
                         <Text style={styles.avatarTxt}>

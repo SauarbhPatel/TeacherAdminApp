@@ -10,13 +10,14 @@ import {
     Platform,
     Animated,
     ActivityIndicator,
+    Image,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { useAuth } from "@/context/AuthContext";
 import { Colors, Radius, Spacing, Shadow } from "@/constants/theme";
 
-const DEMO_USERNAME = "as@gmail.com";
+const DEMO_USERNAME = "azharpsm@gmail.com";
 const DEMO_PASSWORD = "1234";
 
 export default function LoginScreen() {
@@ -118,7 +119,7 @@ export default function LoginScreen() {
                     {/* Branding */}
                     <View style={styles.brandArea}>
                         <View style={styles.logoCircle}>
-                            <Text style={styles.logoEmoji}>🎓</Text>
+                           <Image source={require("../../assets/icon_ed.png")} style={{width:"100%",height:"100%",borderRadius: 22,}}/>
                         </View>
                         <Text style={styles.appName}>Edumug Admin</Text>
                         <Text style={styles.appTagline}>
@@ -358,6 +359,8 @@ const styles = StyleSheet.create({
         marginBottom: 14,
         borderWidth: 1.5,
         borderColor: "rgba(255,255,255,0.35)",
+        overflow:"hidden",
+        padding:4
     },
     logoEmoji: { fontSize: 38 },
     appName: {

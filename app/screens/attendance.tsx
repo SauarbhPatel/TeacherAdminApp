@@ -30,6 +30,7 @@ import { getDailyAttendance } from "@/services/api";
 import { DailyAttendanceClass, DailyAttendanceTotal } from "@/types";
 import { Colors, Spacing, Radius, Shadow } from "@/constants/theme";
 import { useFocusEffect } from "@react-navigation/native";
+import { BottomNav } from "@/components/ui/BottomNav";
 
 // ─── Helpers ─────────────────────────────────────────────
 function todayISO(): string {
@@ -577,6 +578,7 @@ export default function AttendanceScreen() {
           )}
         </ScrollView>
       )}
+       <BottomNav />
     </View>
   );
 }

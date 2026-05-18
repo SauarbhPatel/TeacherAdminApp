@@ -24,6 +24,7 @@ import { useAuth } from "@/context/AuthContext";
 import { getClassSectionList, getSubjectsByClassSection } from "@/services/api";
 import { ClassWithSections, ClassSection, SubjectItem } from "@/types";
 import { Colors, Spacing, Radius, Shadow } from "@/constants/theme";
+import { BottomNav } from "@/components/ui/BottomNav";
 
 type Step = 1 | 2 | 3;
 
@@ -655,6 +656,8 @@ export default function TestMarksEntryScreen() {
           </>
         )}
       </ScrollView>
+
+       <BottomNav />
     </View>
   );
 }

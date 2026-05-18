@@ -583,7 +583,7 @@ export default function HomeworkEntryScreen() {
                 from_date: fromDate,
                 to_date: toDate,
                 submit_date: submitDate,
-                subjects: subjects.map((s) => ({
+                subjects: subjects?.filter(s=>s.description).map((s) => ({
                     subject_id: parseInt(s.subject_id),
                     description: s.description,
                     document: s.document,
